@@ -1,15 +1,17 @@
 #include <Arduino.h>
+#include <WIFI.hpp>
 
-#include "./Hello/Hello.hpp"
+#define WIFI_SSID "FIRSTA2"
+#define WIFI_PASSWORD "klaten12345"
 
-Hello nanang("Firmansyah");
+WIFI wifi(WIFI_SSID, WIFI_PASSWORD);
 
 void setup()
 {
-  Serial.begin(115200);
+  wifi.init();
 }
 
 void loop()
 {
-  Serial.println(nanang.helloName());
+  wifi.check();
 }
