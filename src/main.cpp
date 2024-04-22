@@ -1,8 +1,7 @@
 #include <Arduino.h>
 #include <WIFI.hpp>
 
-#define WIFI_SSID "FIRSTA2"
-#define WIFI_PASSWORD "klaten12345"
+#include "env.h"
 
 WIFI wifi(WIFI_SSID, WIFI_PASSWORD);
 
