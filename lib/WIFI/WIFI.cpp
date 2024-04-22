@@ -1,6 +1,6 @@
 #include "WIFI.hpp"
 
-WIFI::WIFI(const String &ssid, const String &password)
+WIFI::WIFI(const char* ssid, const char* password)
 {
     this->ssid = ssid;
     this->password = password;
