@@ -15,7 +15,7 @@ private:
     bool connection = false;
 
 public:
-    WIFI(const char* ssid, const char* password);
+    WIFI(const char* ssid, const char* password = NULL);
     void init();
     void check();
 };
