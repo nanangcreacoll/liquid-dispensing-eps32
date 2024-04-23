@@ -17,7 +17,7 @@ void WIFI::init()
     {
         if (millis() - timeNow >= WIFI_CONNECTING_PERIOD)
         {
-            Serial.println("Connecting ...");
+            Serial.println("Connecting to WiFi ...");
             timeNow = millis();
         }
     }
