@@ -1,6 +1,6 @@
 #include "WIFI.hpp"
 
-WIFI::WIFI(const String &ssid, const String &password)
+WIFI::WIFI(const char* ssid, const char* password)
 {
     this->ssid = ssid;
     this->password = password;
@@ -17,7 +17,7 @@ void WIFI::init()
     {
         if (millis() - timeNow >= WIFI_CONNECTING_PERIOD)
         {
-            Serial.println("Connecting ...");
+            Serial.println("Connecting to WiFi ...");
             timeNow = millis();
         }
     }
