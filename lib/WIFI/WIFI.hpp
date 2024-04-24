@@ -7,7 +7,7 @@
 #define WIFI_TIMEOUT_MS 5000
 #define WIFI_CONNECTING_PERIOD 500
 
-class WIFI 
+class WIFI
 {
 private:
     String ssid;
@@ -15,7 +15,7 @@ private:
     bool connection = false;
 
 public:
-    WIFI(const char* ssid, const char* password = NULL);
+    WIFI(const char *ssid, const char *password = NULL);
     void init();
     void check();
 };
