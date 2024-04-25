@@ -1,27 +1,24 @@
 #include "Dispensing.hpp"
 
-Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[])
+Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[])
 {
     this->stepPinX = pinsX[0];
     this->dirPinX = pinsX[1];
     this->enablePinX = pinsX[2];
-    this->ms1PinX = pinsX[3];
-    this->ms2PinX = pinsX[4];
     this->limitSwitchPinX = pinsX[5];
 
     this->stepPinZ = pinsZ[0];
     this->dirPinZ = pinsZ[1];
     this->enablePinZ = pinsZ[2];
-    this->ms1PinZ = pinsZ[3];
-    this->ms2PinZ = pinsZ[4];
     this->limitSwitchPinZ = pinsZ[5];
 
     this->stepPinZp = pinsZp[0];
     this->dirPinZp = pinsZp[1];
     this->enablePinZp = pinsZp[2];
-    this->ms1PinZp = pinsZp[3];
-    this->ms2PinZp = pinsZp[4];
     this->limitSwitchPinZp = pinsZp[5];
+
+    this->ms1Pin = msPins[0];
+    this->ms2Pin = msPins[1];
     
     stepperX = AccelStepper(AccelStepper::DRIVER, this->stepPinX, this->dirPinX);
     stepperZ = AccelStepper(AccelStepper::DRIVER, this->stepPinZ, this->dirPinZ);
@@ -30,122 +27,82 @@ Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp
 
 void Dispensing::init()
 {
-    pinMode(this->ms1PinX, OUTPUT);
-    pinMode(this->ms2PinX, OUTPUT);
+    Serial.begin(115200);
+
+    pinMode(this->ms1Pin, OUTPUT);
+    pinMode(this->ms2Pin, OUTPUT);
     pinMode(this->limitSwitchPinX, INPUT);
-    pinMode(this->ms1PinZ, OUTPUT);
-    pinMode(this->ms2PinZ, OUTPUT);
     pinMode(this->limitSwitchPinZ, INPUT);
-    pinMode(this->ms1PinZp, OUTPUT);
-    pinMode(this->ms2PinZp, OUTPUT);
     pinMode(this->limitSwitchPinZp, INPUT);
 
-    stepperX.setEnablePin(this->enablePinX);
-    stepperX.setPinsInverted(false, false, true);
-    stepperX.enableOutputs();
-    digitalWrite(this->enablePinX, LOW);
     if (MIRCROSTEPS == 16)
     {
-        digitalWrite(this->ms1PinX, HIGH);
-        digitalWrite(this->ms2PinX, HIGH);
+        digitalWrite(this->ms1Pin, HIGH);
+        digitalWrite(this->ms2Pin, HIGH);
     }
     else if (MIRCROSTEPS == 8)
     {
-        digitalWrite(this->ms1PinX, LOW);
-        digitalWrite(this->ms2PinX, LOW);
+        digitalWrite(this->ms1Pin, LOW);
+        digitalWrite(this->ms2Pin, LOW);
     }
     else if (MIRCROSTEPS == 4)
     {
-        digitalWrite(this->ms1PinX, LOW);
-        digitalWrite(this->ms2PinX, HIGH);
+        digitalWrite(this->ms1Pin, LOW);
+        digitalWrite(this->ms2Pin, HIGH);
     }
     else if (MIRCROSTEPS == 2)
     {
-        digitalWrite(this->ms1PinX, HIGH);
-        digitalWrite(this->ms2PinX, LOW);
+        digitalWrite(this->ms1Pin, HIGH);
+        digitalWrite(this->ms2Pin, LOW);
     }
     else
     {
-        digitalWrite(this->ms1PinX, HIGH);
-        digitalWrite(this->ms2PinX, LOW);
+        digitalWrite(this->ms1Pin, HIGH);
+        digitalWrite(this->ms2Pin, LOW);
     }
+
+    Serial.println("Initializing stepper motors for dispensing ...");
+    Serial.println("Using Microsteps: " + String(MIRCROSTEPS));
+    
+    stepperX.setEnablePin(this->enablePinX);
+    stepperX.setPinsInverted(false, false, true);
+    stepperX.enableOutputs();
 
     stepperZ.setEnablePin(this->enablePinZ);
     stepperZ.setPinsInverted(false, false, true);
     stepperZ.enableOutputs();
-    if (MIRCROSTEPS == 16)
-    {
-        digitalWrite(this->ms1PinZ, HIGH);
-        digitalWrite(this->ms2PinZ, HIGH);
-    }
-    else if (MIRCROSTEPS == 8)
-    {
-        digitalWrite(this->ms1PinZ, LOW);
-        digitalWrite(this->ms2PinZ, LOW);
-    }
-    else if (MIRCROSTEPS == 4)
-    {
-        digitalWrite(this->ms1PinZ, LOW);
-        digitalWrite(this->ms2PinZ, HIGH);
-    }
-    else if (MIRCROSTEPS == 2)
-    {
-        digitalWrite(this->ms1PinZ, HIGH);
-        digitalWrite(this->ms2PinZ, LOW);
-    }
-    else
-    {
-        digitalWrite(this->ms1PinZ, HIGH);
-        digitalWrite(this->ms2PinZ, LOW);
-    }
     
     stepperZp.setEnablePin(this->enablePinZp);
     stepperZp.setPinsInverted(false, false, true);
     stepperZp.enableOutputs();
-    if (MIRCROSTEPS == 16)
-    {
-        digitalWrite(this->ms1PinZp, HIGH);
-        digitalWrite(this->ms2PinZp, HIGH);
-    }
-    else if (MIRCROSTEPS == 8)
-    {
-        digitalWrite(this->ms1PinZp, LOW);
-        digitalWrite(this->ms2PinZp, LOW);
-    }
-    else if (MIRCROSTEPS == 4)
-    {
-        digitalWrite(this->ms1PinZp, LOW);
-        digitalWrite(this->ms2PinZp, HIGH);
-    }
-    else if (MIRCROSTEPS == 2)
-    {
-        digitalWrite(this->ms1PinZp, HIGH);
-        digitalWrite(this->ms2PinZp, LOW);
-    }
-    else
-    {
-        digitalWrite(this->ms1PinZp, HIGH);
-        digitalWrite(this->ms2PinZp, LOW);
-    }
 
     stepperX.setMaxSpeed(MAX_SPEED);
     stepperX.setAcceleration(ACCELERATION);
+    Serial.println("Stepper X max speed: " + String(MAX_SPEED) + " steps/s, acceleration: " + String(ACCELERATION) + " steps/s^2");
 
     stepperZ.setMaxSpeed(MAX_SPEED);
     stepperZ.setAcceleration(ACCELERATION);
+    Serial.println("Stepper Z max speed: " + String(MAX_SPEED) + " steps/s, acceleration: " + String(ACCELERATION) + " steps/s^2");
 
     stepperZp.setMaxSpeed(MAX_SPEED);
     stepperZp.setAcceleration(ACCELERATION);
+    Serial.println("Stepper Z' max speed: " + String(MAX_SPEED) + " steps/s, acceleration: " + String(ACCELERATION) + " steps/s^2");
 
     this->homing();
 
     stepperX.disableOutputs();
     stepperZ.disableOutputs();
     stepperZp.disableOutputs();
+
+    Serial.flush();
 }
 
 void Dispensing::homing()
 {
+    Serial.begin(115200);
+
+    Serial.println("Homing stepper motors ...");
+
     stepperX.enableOutputs();
     stepperX.setSpeed(-HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinX) != HIGH)
@@ -162,6 +119,7 @@ void Dispensing::homing()
     stepperX.setCurrentPosition(HOME_POS);
     stepperX.disableOutputs();
     this->homedX = true;
+    Serial.println("Stepper X homed!");
 
     stepperZ.enableOutputs();
     stepperZ.setSpeed(-HOMING_SPEED);
@@ -179,6 +137,7 @@ void Dispensing::homing()
     stepperZ.setCurrentPosition(HOME_POS);
     stepperZ.disableOutputs();
     this->homedZ = true;
+    Serial.println("Stepper Z homed!");
 
     stepperZp.enableOutputs();
     stepperZp.setSpeed(-HOMING_SPEED);
@@ -196,4 +155,9 @@ void Dispensing::homing()
     stepperZp.setCurrentPosition(HOME_POS);
     stepperZp.disableOutputs();
     this->homedZp = true;
+    Serial.println("Stepper Z' homed!");
+
+    Serial.println("Stepper motors homed!");
+
+    Serial.flush();
 }

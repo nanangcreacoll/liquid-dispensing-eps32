@@ -21,31 +21,28 @@ private:
     byte stepPinX;
     byte dirPinX;
     byte enablePinX;
-    byte ms1PinX;
-    byte ms2PinX;
     byte limitSwitchPinX;
     bool homedX = false; 
 
     byte stepPinZ;
     byte dirPinZ;
     byte enablePinZ;
-    byte ms1PinZ;
-    byte ms2PinZ;
     byte limitSwitchPinZ;
     bool homedZ = false;
 
     byte stepPinZp;
     byte dirPinZp;
     byte enablePinZp;
-    byte ms1PinZp;
-    byte ms2PinZp;
     byte limitSwitchPinZp;
     bool homedZp = false;
 
-    int volume;
-    int capsuleQty;
+    byte ms1Pin;
+    byte ms2Pin;
+
+    int volume = 0;
+    int capsuleQty = 0;
 public:
-    Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[]);
+    Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[]);
     void init();
     void homing();
 };
