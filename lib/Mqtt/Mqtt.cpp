@@ -21,7 +21,6 @@ void Mqtt::init()
 
 void Mqtt::callback(char *topic, byte *message, unsigned int length)
 {
-    Serial.begin(115200);
     this->subTopic = topic;
     Serial.print("Received message from topic: ");
     Serial.println(topic);
@@ -30,7 +29,6 @@ void Mqtt::callback(char *topic, byte *message, unsigned int length)
         this->subMessage += (char)message[i];
     }
     Serial.println(this->subMessage);
-    Serial.flush();
 }
 
 void Mqtt::subscribe(const char *topic)
@@ -48,7 +46,6 @@ void Mqtt::publish(const char *topic, const char *message)
 
 void Mqtt::connect()
 {
-    Serial.begin(115200);
     unsigned long timeNow = 0;
     while (!pubSubClient.connected())
     {
@@ -71,7 +68,6 @@ void Mqtt::connect()
             timeNow = millis();
         }
     }
-    Serial.flush();
 }
 
 void Mqtt::check()

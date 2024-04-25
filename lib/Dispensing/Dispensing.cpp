@@ -27,8 +27,6 @@ Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp
 
 void Dispensing::init()
 {
-    Serial.begin(115200);
-
     pinMode(this->ms1Pin, OUTPUT);
     pinMode(this->ms2Pin, OUTPUT);
     pinMode(this->limitSwitchPinX, INPUT);
@@ -93,14 +91,10 @@ void Dispensing::init()
     stepperX.disableOutputs();
     stepperZ.disableOutputs();
     stepperZp.disableOutputs();
-
-    Serial.flush();
 }
 
 void Dispensing::homing()
 {
-    Serial.begin(115200);
-
     Serial.println("Homing stepper motors ...");
 
     stepperX.enableOutputs();
@@ -158,6 +152,9 @@ void Dispensing::homing()
     Serial.println("Stepper Z' homed!");
 
     Serial.println("Stepper motors homed!");
+}
 
-    Serial.flush();
+bool Dispensing::readLimitSwitch(byte limitSwitchPin)
+{
+    return digitalRead(limitSwitchPin);
 }

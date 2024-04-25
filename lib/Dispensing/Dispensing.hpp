@@ -45,6 +45,7 @@ public:
     Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[]);
     void init();
     void homing();
+    bool readLimitSwitch(byte limitSwitchPin);
 };
 
 #endif

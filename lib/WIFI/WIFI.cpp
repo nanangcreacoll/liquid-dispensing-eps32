@@ -8,7 +8,6 @@ WIFI::WIFI(const char *ssid, const char *password)
 
 void WIFI::init()
 {
-    Serial.begin(115200);
     WiFi.begin(this->ssid, this->password);
 
     unsigned long startAttemptTime = millis();
@@ -33,13 +32,10 @@ void WIFI::init()
         Serial.println(WiFi.localIP());
         this->connection = false;
     }
-
-    Serial.flush();
 }
 
 void WIFI::check()
 {
-    Serial.begin(115200);
     if (WiFi.status() != WL_CONNECTED && !this->connection)
     {
         unsigned long timeNow = 0;
@@ -59,5 +55,4 @@ void WIFI::check()
         Serial.println(WiFi.localIP());
         this->connection = false;
     }
-    Serial.flush();
 }
