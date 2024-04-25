@@ -17,6 +17,7 @@ Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins);
 
 void setup()
 {
+  Serial.begin(115200);
   wifi.init();
   mqtt.init();
   mqtt.subscribe(DISPENSING_DATA_TOPIC);
