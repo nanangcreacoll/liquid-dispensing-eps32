@@ -9,17 +9,18 @@ Mqtt::Mqtt(const char *server, unsigned int port, const char *clientId, const ch
     this->clientId = clientId;
     pubSubClient.setClient(wifiClient);
     pubSubClient.setServer(this->server.c_str(), this->port);
+    pubSubClient.setCallback([this](char *topic, byte *message, unsigned int length) {
+        this->callback(topic, message, length);
+    });
 }
 
 void Mqtt::init()
 {
     this->connect();
-    this->setCallback();
 }
 
 void Mqtt::callback(char *topic, byte *message, unsigned int length)
 {
-    Serial.begin(115200);
     this->subTopic = topic;
     Serial.print("Received message from topic: ");
     Serial.println(topic);
@@ -28,14 +29,6 @@ void Mqtt::callback(char *topic, byte *message, unsigned int length)
         this->subMessage += (char)message[i];
     }
     Serial.println(this->subMessage);
-    Serial.flush();
-}
-
-void Mqtt::setCallback()
-{
-    pubSubClient.setCallback([this](char *topic, byte *message, unsigned int length) {
-        this->callback(topic, message, length);
-    });
 }
 
 void Mqtt::subscribe(const char *topic)
@@ -51,14 +44,8 @@ void Mqtt::publish(const char *topic, const char *message)
     pubSubClient.publish(topic, message);
 }
 
-void Mqtt::loop()
-{
-    pubSubClient.loop();
-}
-
 void Mqtt::connect()
 {
-    Serial.begin(115200);
     unsigned long timeNow = 0;
     while (!pubSubClient.connected())
     {
@@ -81,7 +68,6 @@ void Mqtt::connect()
             timeNow = millis();
         }
     }
-    Serial.flush();
 }
 
 void Mqtt::check()
@@ -90,6 +76,7 @@ void Mqtt::check()
     {
         this->connect();
     }
+    pubSubClient.loop();
 }
 
 String Mqtt::getPubMessage()

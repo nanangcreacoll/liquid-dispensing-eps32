@@ -28,10 +28,8 @@ public:
     Mqtt(const char* server, unsigned int port, const char* clientId, const char* username = NULL, const char* password = NULL);
     void init();
     void callback(char* topic, byte* message, unsigned int length);
-    void setCallback();
     void subscribe(const char* topic);
     void publish(const char* topic, const char* message);
-    void loop();
     void connect();
     void check();
     String getSubMessage();
