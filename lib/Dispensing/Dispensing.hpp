@@ -8,7 +8,7 @@
 #define STEPS_PER_REV 200
 #define MAX_SPEED 1000
 #define ACCELERATION 200
-#define HOMING_SPEED 200
+#define HOMING_SPEED 1000
 #define HOME_POS ((STEPS_PER_REV * MIRCROSTEPS)/4)
 
 class Dispensing
@@ -22,18 +22,21 @@ private:
     byte dirPinX;
     byte enablePinX;
     byte limitSwitchPinX;
+    byte ledPinX;
     bool homedX = false; 
 
     byte stepPinZ;
     byte dirPinZ;
     byte enablePinZ;
     byte limitSwitchPinZ;
+    byte ledPinZ;
     bool homedZ = false;
 
     byte stepPinZp;
     byte dirPinZp;
     byte enablePinZp;
     byte limitSwitchPinZp;
+    byte ledPinZp;
     bool homedZp = false;
 
     byte ms1Pin;
