@@ -5,17 +5,20 @@ Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp
     this->stepPinX = pinsX[0];
     this->dirPinX = pinsX[1];
     this->enablePinX = pinsX[2];
-    this->limitSwitchPinX = pinsX[5];
+    this->limitSwitchPinX = pinsX[3];
+    this->ledPinX = pinsX[4];
 
     this->stepPinZ = pinsZ[0];
     this->dirPinZ = pinsZ[1];
     this->enablePinZ = pinsZ[2];
-    this->limitSwitchPinZ = pinsZ[5];
+    this->limitSwitchPinZ = pinsZ[3];
+    this->ledPinZ = pinsZ[4];
 
     this->stepPinZp = pinsZp[0];
     this->dirPinZp = pinsZp[1];
     this->enablePinZp = pinsZp[2];
-    this->limitSwitchPinZp = pinsZp[5];
+    this->limitSwitchPinZp = pinsZp[3];
+    this->ledPinZp = pinsZp[4];
 
     this->ms1Pin = msPins[0];
     this->ms2Pin = msPins[1];
@@ -29,6 +32,9 @@ void Dispensing::init()
 {
     pinMode(this->ms1Pin, OUTPUT);
     pinMode(this->ms2Pin, OUTPUT);
+    pinMode(this->ledPinX, OUTPUT);
+    pinMode(this->ledPinZ, OUTPUT);
+    pinMode(this->ledPinZp, OUTPUT);
     pinMode(this->limitSwitchPinX, INPUT);
     pinMode(this->limitSwitchPinZ, INPUT);
     pinMode(this->limitSwitchPinZp, INPUT);
@@ -63,16 +69,13 @@ void Dispensing::init()
     Serial.println("Using Microsteps: " + String(MIRCROSTEPS));
     
     stepperX.setEnablePin(this->enablePinX);
-    stepperX.setPinsInverted(false, false, true);
-    stepperX.enableOutputs();
+    stepperX.setPinsInverted(true, false, true);
 
     stepperZ.setEnablePin(this->enablePinZ);
     stepperZ.setPinsInverted(false, false, true);
-    stepperZ.enableOutputs();
     
     stepperZp.setEnablePin(this->enablePinZp);
     stepperZp.setPinsInverted(false, false, true);
-    stepperZp.enableOutputs();
 
     stepperX.setMaxSpeed(MAX_SPEED);
     stepperX.setAcceleration(ACCELERATION);
@@ -86,11 +89,11 @@ void Dispensing::init()
     stepperZp.setAcceleration(ACCELERATION);
     Serial.println("Stepper Z' max speed: " + String(MAX_SPEED) + " steps/s, acceleration: " + String(ACCELERATION) + " steps/s^2");
 
-    this->homing();
-
     stepperX.disableOutputs();
     stepperZ.disableOutputs();
     stepperZp.disableOutputs();
+
+    this->homing();
 }
 
 void Dispensing::homing()
@@ -98,12 +101,14 @@ void Dispensing::homing()
     Serial.println("Homing stepper motors ...");
 
     stepperX.enableOutputs();
+    digitalWrite(this->ledPinX, HIGH);
     stepperX.setSpeed(-HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinX) != HIGH)
     {
         stepperX.runSpeed();
     }
     stepperX.setCurrentPosition(0);
+    Serial.println("Stepper X on limit switch");
     stepperX.moveTo(HOME_POS);
     stepperX.setSpeed(HOMING_SPEED);
     while (stepperX.currentPosition() != HOME_POS)
@@ -112,16 +117,19 @@ void Dispensing::homing()
     }
     stepperX.setCurrentPosition(HOME_POS);
     stepperX.disableOutputs();
+    digitalWrite(this->ledPinX, LOW);
     this->homedX = true;
     Serial.println("Stepper X homed!");
 
     stepperZ.enableOutputs();
+    digitalWrite(this->ledPinZ, HIGH);
     stepperZ.setSpeed(-HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinZ) != HIGH)
     {
         stepperZ.runSpeed();
     }
     stepperZ.setCurrentPosition(0);
+    Serial.println("Stepper Z on limit switch");
     stepperZ.moveTo(HOME_POS);
     stepperZ.setSpeed(HOMING_SPEED);
     while (stepperZ.currentPosition() != HOME_POS)
@@ -130,16 +138,19 @@ void Dispensing::homing()
     }
     stepperZ.setCurrentPosition(HOME_POS);
     stepperZ.disableOutputs();
+    digitalWrite(this->ledPinZ, LOW);
     this->homedZ = true;
     Serial.println("Stepper Z homed!");
 
     stepperZp.enableOutputs();
+    digitalWrite(this->ledPinZp, HIGH);
     stepperZp.setSpeed(-HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinZp) != HIGH)
     {
         stepperZp.runSpeed();
     }
     stepperZp.setCurrentPosition(0);
+    Serial.println("Stepper Z' on limit switch");
     stepperZp.moveTo(HOME_POS);
     stepperZp.setSpeed(HOMING_SPEED);
     while (stepperZp.currentPosition() != HOME_POS)
@@ -148,6 +159,7 @@ void Dispensing::homing()
     }
     stepperZp.setCurrentPosition(HOME_POS);
     stepperZp.disableOutputs();
+    digitalWrite(this->ledPinZp, LOW);
     this->homedZp = true;
     Serial.println("Stepper Z' homed!");
 
