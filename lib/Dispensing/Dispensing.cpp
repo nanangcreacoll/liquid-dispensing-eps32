@@ -189,14 +189,23 @@ void Dispensing::readLimitSwitch()
 void Dispensing::ledTest()
 {
     digitalWrite(this->ledPinX, HIGH);
+    Serial.println("LED X ON");
     delay(1000);
     digitalWrite(this->ledPinX, LOW);
+    Serial.println("LED X OFF");
+
     digitalWrite(this->ledPinZ, HIGH);
+    Serial.println("LED Z ON");
     delay(1000);
     digitalWrite(this->ledPinZ, LOW);
+    Serial.println("LED Z OFF");
+
     digitalWrite(this->ledPinZp, HIGH);
+    Serial.println("LED Z' ON");
     delay(1000);
+
     digitalWrite(this->ledPinZp, LOW);
+    Serial.println("LED Z' OFF");
 }
 
 void Dispensing::solenoidTest()
