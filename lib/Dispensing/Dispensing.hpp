@@ -42,10 +42,12 @@ private:
     byte ms1Pin;
     byte ms2Pin;
 
+    byte solenoidPin;
+
     int volume = 0;
     int capsuleQty = 0;
 public:
-    Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[]);
+    Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[], const byte solenoidPin);
     
     // proccess methods
     void init();
@@ -54,6 +56,7 @@ public:
     // test methods
     void readLimitSwitch();
     void ledTest();
+    void solenoidTest();
 };
 
 #endif

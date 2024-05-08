@@ -1,6 +1,6 @@
 #include "Dispensing.hpp"
 
-Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[])
+Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[], const byte solenoidPin)
 {
     this->stepPinX = pinsX[0];
     this->dirPinX = pinsX[1];
@@ -22,6 +22,8 @@ Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp
 
     this->ms1Pin = msPins[0];
     this->ms2Pin = msPins[1];
+
+    this->solenoidPin = solenoidPin;
     
     stepperX = AccelStepper(AccelStepper::DRIVER, this->stepPinX, this->dirPinX);
     stepperZ = AccelStepper(AccelStepper::DRIVER, this->stepPinZ, this->dirPinZ);
@@ -30,14 +32,18 @@ Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp
 
 void Dispensing::init()
 {
-    pinMode(this->ms1Pin, OUTPUT);
-    pinMode(this->ms2Pin, OUTPUT);
-    pinMode(this->ledPinX, OUTPUT);
-    pinMode(this->ledPinZ, OUTPUT);
-    pinMode(this->ledPinZp, OUTPUT);
     pinMode(this->limitSwitchPinX, INPUT);
     pinMode(this->limitSwitchPinZ, INPUT);
     pinMode(this->limitSwitchPinZp, INPUT);
+    
+    pinMode(this->ledPinX, OUTPUT);
+    pinMode(this->ledPinZ, OUTPUT);
+    pinMode(this->ledPinZp, OUTPUT);
+
+    pinMode(this->ms1Pin, OUTPUT);
+    pinMode(this->ms2Pin, OUTPUT);
+
+    pinMode(this->solenoidPin, OUTPUT);
 
     if (MIRCROSTEPS == 16)
     {
@@ -92,8 +98,6 @@ void Dispensing::init()
     stepperX.disableOutputs();
     stepperZ.disableOutputs();
     stepperZp.disableOutputs();
-
-    this->homing();
 }
 
 void Dispensing::homing()
@@ -193,4 +197,13 @@ void Dispensing::ledTest()
     digitalWrite(this->ledPinZp, HIGH);
     delay(1000);
     digitalWrite(this->ledPinZp, LOW);
+}
+
+void Dispensing::solenoidTest()
+{
+    digitalWrite(this->solenoidPin, HIGH);
+    delay(1000);
+    Serial.println("Solenoid ON");
+    digitalWrite(this->solenoidPin, LOW);
+    Serial.println("Solenoid OFF");
 }

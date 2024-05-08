@@ -13,7 +13,7 @@ byte pinsZ[] = {STEPPER_Z_STEP, STEPPER_Z_DIR, STEPPER_Z_ENABLE, STEPPER_Z_LIMIT
 byte pinsZp[] = {STEPPER_ZP_STEP, STEPPER_ZP_DIR, STEPPER_ZP_ENABLE, STEPPER_ZP_LIMIT_SWITCH, STEPPER_ZP_LED};
 byte msPins[] = {MS1_PIN, MS2_PIN};
 
-Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins);
+Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins, SOLENOID_PIN);
 
 void setup()
 {
