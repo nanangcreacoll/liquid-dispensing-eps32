@@ -166,7 +166,31 @@ void Dispensing::homing()
     Serial.println("Stepper motors homed!");
 }
 
-bool Dispensing::readLimitSwitch(byte limitSwitchPin)
+void Dispensing::readLimitSwitch()
 {
-    return digitalRead(limitSwitchPin);
+    if (digitalRead(this->limitSwitchPinX) == HIGH)
+    {
+        Serial.println("Stepper X on limit switch");
+    }
+    if (digitalRead(this->limitSwitchPinZ) == HIGH)
+    {
+        Serial.println("Stepper Z on limit switch");
+    }
+    if (digitalRead(this->limitSwitchPinZp) == HIGH)
+    {
+        Serial.println("Stepper Z' on limit switch");
+    }
+}
+
+void Dispensing::ledTest()
+{
+    digitalWrite(this->ledPinX, HIGH);
+    delay(1000);
+    digitalWrite(this->ledPinX, LOW);
+    digitalWrite(this->ledPinZ, HIGH);
+    delay(1000);
+    digitalWrite(this->ledPinZ, LOW);
+    digitalWrite(this->ledPinZp, HIGH);
+    delay(1000);
+    digitalWrite(this->ledPinZp, LOW);
 }

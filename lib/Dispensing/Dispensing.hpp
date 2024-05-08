@@ -46,9 +46,14 @@ private:
     int capsuleQty = 0;
 public:
     Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[]);
+    
+    // proccess methods
     void init();
     void homing();
-    bool readLimitSwitch(byte limitSwitchPin);
+
+    // test methods
+    void readLimitSwitch();
+    void ledTest();
 };
 
 #endif
