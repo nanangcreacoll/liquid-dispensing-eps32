@@ -202,8 +202,8 @@ void Dispensing::ledTest()
 void Dispensing::solenoidTest()
 {
     digitalWrite(this->solenoidPin, HIGH);
-    delay(1000);
     Serial.println("Solenoid ON");
+    delay(1000);
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Solenoid OFF");
 }
