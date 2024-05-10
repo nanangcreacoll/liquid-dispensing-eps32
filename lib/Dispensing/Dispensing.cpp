@@ -216,3 +216,19 @@ void Dispensing::solenoidTest()
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Solenoid OFF");
 }
+
+void Dispensing::allLedAndSolenoidTest()
+{
+    digitalWrite(this->ledPinX, HIGH);
+    digitalWrite(this->ledPinZ, HIGH);
+    digitalWrite(this->ledPinZp, HIGH);
+    digitalWrite(this->solenoidPin, HIGH);
+    Serial.println("LEDs and Solenoid ON");
+    delay(1000);
+    digitalWrite(this->ledPinX, LOW);
+    digitalWrite(this->ledPinZ, LOW);
+    digitalWrite(this->ledPinZp, LOW);
+    digitalWrite(this->solenoidPin, LOW);
+    Serial.println("LEDs and Solenoid OFF");
+    delay(1000);
+}

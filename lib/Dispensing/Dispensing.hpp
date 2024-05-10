@@ -57,6 +57,7 @@ public:
     void readLimitSwitch();
     void ledTest();
     void solenoidTest();
+    void allLedAndSolenoidTest();
 };
 
 #endif
