@@ -193,12 +193,14 @@ void Dispensing::ledTest()
     delay(1000);
     digitalWrite(this->ledPinX, LOW);
     Serial.println("LED X OFF");
+    delay(1000);
 
     digitalWrite(this->ledPinZ, HIGH);
     Serial.println("LED Z ON");
     delay(1000);
     digitalWrite(this->ledPinZ, LOW);
     Serial.println("LED Z OFF");
+    delay(1000);
 
     digitalWrite(this->ledPinZp, HIGH);
     Serial.println("LED Z' ON");
@@ -206,6 +208,7 @@ void Dispensing::ledTest()
 
     digitalWrite(this->ledPinZp, LOW);
     Serial.println("LED Z' OFF");
+    delay(1000);
 }
 
 void Dispensing::solenoidTest()
@@ -215,6 +218,7 @@ void Dispensing::solenoidTest()
     delay(1000);
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Solenoid OFF");
+    delay(1000);
 }
 
 void Dispensing::allLedAndSolenoidTest()
