@@ -97,6 +97,7 @@ public:
     void runAndFindPosX(long pos, unsigned long speed);
     void runAndFindPosZ(long pos, unsigned long speed);
     void runAndFindPosZp(long pos, unsigned long speed);
+    void serialCalibration();
 };
 
 #endif

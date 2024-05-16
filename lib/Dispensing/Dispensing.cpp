@@ -642,7 +642,7 @@ void Dispensing::dispensing(int &volume, int &capsuleQty)
         Serial.println("Stepper motors not homed!");
         return;
     }
-    
+
     Serial.println("Dispensing completed!");
 }
 
@@ -717,4 +717,46 @@ bool Dispensing::emptySyringe()
         Serial.println("Stepper motors Z' not homed or Stepper motors X and Z not at vial position!");
         return false;
     }
+}
+
+void Dispensing::serialCalibration()
+{
+    Serial.println("Stepper X calibration ...");
+    Serial.println("Enter the position for Stepper X: ");
+    while (Serial.available() == 0)
+    {
+    }
+    long pos = Serial.parseInt();
+    Serial.println("Enter the speed for Stepper X: ");
+    while (Serial.available() == 0)
+    {
+    }
+    unsigned long speed = Serial.parseInt();
+    this->runAndFindPosX(pos, speed);
+
+    Serial.println("Stepper Z calibration ...");
+    Serial.println("Enter the position for Stepper Z: ");
+    while (Serial.available() == 0)
+    {
+    }
+    pos = Serial.parseInt();
+    Serial.println("Enter the speed for Stepper Z: ");
+    while (Serial.available() == 0)
+    {
+    }
+    speed = Serial.parseInt();
+    this->runAndFindPosZ(pos, speed);
+
+    Serial.println("Stepper Z' calibration ...");
+    Serial.println("Enter the position for Stepper Z': ");
+    while (Serial.available() == 0)
+    {
+    }
+    pos = Serial.parseInt();
+    Serial.println("Enter the speed for Stepper Z': ");
+    while (Serial.available() == 0)
+    {
+    }
+    speed = Serial.parseInt();
+    this->runAndFindPosZp(pos, speed);
 }
