@@ -11,6 +11,30 @@
 #define HOMING_SPEED 1000
 #define HOME_POS ((STEPS_PER_REV * MIRCROSTEPS)/4)
 
+#define VIAL_X_POS 0
+#define VIAL_Z_POS 0
+
+#define CAPSULE_1_X_POS 0
+#define CAPSULE_2_X_POS 0
+#define CAPSULE_3_X_POS 0
+#define CAPSULE_4_X_POS 0
+#define CAPSULE_5_X_POS 0
+
+#define CAPSULE_1_Z_POS 0
+#define CAPSULE_2_Z_POS 0
+#define CAPSULE_3_Z_POS 0
+#define CAPSULE_4_Z_POS 0
+#define CAPSULE_5_Z_POS 0
+
+#define SYRINGE_MIN_POS 0
+#define SYRINGE_MAX_POS 0
+
+#define SYRINGE_MIN_VOLUME 0
+#define SYRINGE_MAX_VOLUME 50
+
+#define CAPSULE_MIN_QTY 0
+#define CAPSULE_MAX_QTY 5
+
 class Dispensing
 {
 private:
@@ -46,18 +70,33 @@ private:
 
     int volume = 0;
     int capsuleQty = 0;
+    bool status = true;
+
+    long sryingeFillingSteps = map(volume, SYRINGE_MIN_VOLUME, SYRINGE_MAX_VOLUME, SYRINGE_MIN_POS, SYRINGE_MAX_POS);
+    
+    bool fillSyringe();
+    bool dispenseSyringe();
+    bool emptySyringe();
+    
+
 public:
     Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[], const byte solenoidPin);
     
     // proccess methods
     void init();
     void homing();
+    void dispensing(int &volume, int &capsuleQty);
 
     // test methods
     void readLimitSwitch();
     void ledTest();
     void solenoidTest();
     void allLedAndSolenoidTest();
+
+    // calibration methods
+    void runAndFindPosX(long pos, unsigned long speed);
+    void runAndFindPosZ(long pos, unsigned long speed);
+    void runAndFindPosZp(long pos, unsigned long speed);
 };
 
 #endif
