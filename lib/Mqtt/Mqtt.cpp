@@ -31,17 +31,17 @@ void Mqtt::callback(char *topic, byte *message, unsigned int length)
     Serial.println(this->subMessage);
 }
 
-void Mqtt::subscribe(const char *topic)
+bool Mqtt::subscribe(const char *topic)
 {
     this->subTopic = topic;
-    pubSubClient.subscribe(topic);
+    return pubSubClient.subscribe(topic);
 }
 
-void Mqtt::publish(const char *topic, const char *message)
+bool Mqtt::publish(const char *topic, const char *message)
 {
     this->pubTopic = topic;
     this->pubMessage = message;
-    pubSubClient.publish(topic, message);
+    return pubSubClient.publish(topic, message);
 }
 
 void Mqtt::connect()
@@ -77,6 +77,12 @@ void Mqtt::check()
         this->connect();
     }
     pubSubClient.loop();
+}
+
+bool Mqtt::clearSubMessage()
+{
+    this->subMessage = "";
+    return true;
 }
 
 String Mqtt::getPubMessage()
