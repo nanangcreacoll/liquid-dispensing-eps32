@@ -2,6 +2,7 @@
 #include <WIFI.hpp>
 #include <Mqtt.hpp>
 #include <Dispensing.hpp>
+#include <ArduinoJson.h>
 
 #include "env.h"
 
@@ -20,12 +21,60 @@ void setup()
   Serial.begin(115200);
   wifi.init();
   mqtt.init();
-  mqtt.subscribe(DISPENSING_DATA_TOPIC);
+  if (mqtt.subscribe(DISPENSING_DATA_TOPIC))
+  {
+    Serial.println("Subscribed to topic dispensing/data!");
+  } 
+  else
+  {
+    Serial.println("Failed to subscribe to topic dispensing/data!");
+  }
   dispensing.init();
+  // dispensing.homing();
+  dispensing.dummyHoming();
 }
 
 void loop()
 {
   wifi.check();
   mqtt.check();
+
+  if (dispensing.check(mqtt))
+  {
+    JsonDocument doc;
+    doc["status"] = dispensing.getDispensingStatus();
+
+    if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+    {
+      Serial.println("Published to dispensing/status!");
+      Serial.println(doc.as<String>());
+
+      if (dispensing.start())
+      {
+        Serial.println("Dispensing started!");
+        doc["status"] = dispensing.getDispensingStatus();
+        if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+        {
+          Serial.println("Published to dispensing/status!");
+          Serial.println(doc.as<String>());
+        }
+        else
+        {
+          Serial.println("Failed to publish to dispensing/status!");
+        }
+      }
+      else
+      {
+        Serial.println("Failed to start dispensing!");
+      }      
+    }
+    else
+    {
+      Serial.println("Failed to publish to dispensing/status!");
+    }
+  }
+  else
+  {
+    Serial.println("Failed to check dispensing!");
+  }
 }
