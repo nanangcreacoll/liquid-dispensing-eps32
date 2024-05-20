@@ -24,7 +24,7 @@ Dispensing::Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp
     this->ms2Pin = msPins[1];
 
     this->solenoidPin = solenoidPin;
-    
+
     stepperX = AccelStepper(AccelStepper::DRIVER, this->stepPinX, this->dirPinX);
     stepperZ = AccelStepper(AccelStepper::DRIVER, this->stepPinZ, this->dirPinZ);
     stepperZp = AccelStepper(AccelStepper::DRIVER, this->stepPinZp, this->dirPinZp);
@@ -35,7 +35,7 @@ void Dispensing::init()
     pinMode(this->limitSwitchPinX, INPUT);
     pinMode(this->limitSwitchPinZ, INPUT);
     pinMode(this->limitSwitchPinZp, INPUT);
-    
+
     pinMode(this->ledPinX, OUTPUT);
     pinMode(this->ledPinZ, OUTPUT);
     pinMode(this->ledPinZp, OUTPUT);
@@ -45,43 +45,20 @@ void Dispensing::init()
 
     pinMode(this->solenoidPin, OUTPUT);
 
-    if (MIRCROSTEPS == 16)
-    {
-        digitalWrite(this->ms1Pin, HIGH);
-        digitalWrite(this->ms2Pin, HIGH);
-    }
-    else if (MIRCROSTEPS == 8)
-    {
-        digitalWrite(this->ms1Pin, LOW);
-        digitalWrite(this->ms2Pin, LOW);
-    }
-    else if (MIRCROSTEPS == 4)
-    {
-        digitalWrite(this->ms1Pin, LOW);
-        digitalWrite(this->ms2Pin, HIGH);
-    }
-    else if (MIRCROSTEPS == 2)
-    {
-        digitalWrite(this->ms1Pin, HIGH);
-        digitalWrite(this->ms2Pin, LOW);
-    }
-    else
-    {
-        digitalWrite(this->ms1Pin, HIGH);
-        digitalWrite(this->ms2Pin, LOW);
-    }
+    digitalWrite(this->ms1Pin, MS1_STATE);
+    digitalWrite(this->ms2Pin, MS2_STATE);
 
     Serial.println("Initializing stepper motors for dispensing ...");
-    Serial.println("Using Microsteps: " + String(MIRCROSTEPS));
-    
+    Serial.println("Using Microsteps: " + String(MICROSTEPS));
+
     stepperX.setEnablePin(this->enablePinX);
-    stepperX.setPinsInverted(true, false, true);
+    stepperX.setPinsInverted(DIRECTION_INVERT, false, true);
 
     stepperZ.setEnablePin(this->enablePinZ);
-    stepperZ.setPinsInverted(true, false, true);
-    
+    stepperZ.setPinsInverted(DIRECTION_INVERT, false, true);
+
     stepperZp.setEnablePin(this->enablePinZp);
-    stepperZp.setPinsInverted(true, false, true);
+    stepperZp.setPinsInverted(DIRECTION_INVERT, false, true);
 
     stepperX.setMaxSpeed(X_MAX_SPEED);
     stepperX.setAcceleration(X_ACCELERATION);
@@ -110,7 +87,7 @@ void Dispensing::homing()
     this->homeZ();
 
     this->homeZp();
-    
+
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Stepper motors homed!");
 }
@@ -124,15 +101,20 @@ void Dispensing::homeX()
     {
         stepperX.runSpeed();
     }
-    delay(500);
-    stepperX.setCurrentPosition(0);
     Serial.println("Stepper X on limit switch");
-
-    stepperX.setSpeed(X_HOMING_SPEED);
-    stepperX.moveTo(X_HOME_POS);
-    while (stepperX.currentPosition() != X_HOME_POS)
+    stepperX.setCurrentPosition(0);
+    delay(500);
+    stepperX.moveTo(X_OFF_SET);
+    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_OFF_SET)
     {
-        stepperX.runSpeed();
+        stepperX.run();
+    }
+    stepperX.setCurrentPosition(0);
+
+    stepperX.moveTo(X_HOME_POS);
+    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_HOME_POS)
+    {
+        stepperX.run();
     }
     stepperX.setCurrentPosition(X_HOME_POS);
     stepperX.disableOutputs();
@@ -150,14 +132,13 @@ void Dispensing::homeZ()
         stepperZ.runSpeed();
     }
     delay(500);
-    stepperZ.setCurrentPosition(0);
     Serial.println("Stepper Z on limit switch");
-    
-    stepperZ.setSpeed(Z_HOMING_SPEED);
+    stepperZ.setCurrentPosition(0);
+
     stepperZ.moveTo(Z_HOME_POS);
-    while (stepperZ.currentPosition() != Z_HOME_POS)
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_HOME_POS)
     {
-        stepperZ.runSpeed();
+        stepperZ.run();
     }
     stepperZ.setCurrentPosition(Z_HOME_POS);
     stepperZ.disableOutputs();
@@ -175,14 +156,13 @@ void Dispensing::homeZp()
         stepperZp.runSpeed();
     }
     delay(500);
-    stepperZp.setCurrentPosition(0);
     Serial.println("Stepper Z' on limit switch");
+    stepperZp.setCurrentPosition(0);
 
-    stepperZp.setSpeed(ZP_HOMING_SPEED);
     stepperZp.moveTo(ZP_HOME_POS);
-    while (stepperZp.currentPosition() != ZP_HOME_POS)
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_HOME_POS)
     {
-        stepperZp.runSpeed();
+        stepperZp.run();
     }
     stepperZp.setCurrentPosition(ZP_HOME_POS);
     stepperZp.disableOutputs();
@@ -257,45 +237,42 @@ void Dispensing::allLedAndSolenoidTest()
     delay(1000);
 }
 
-void Dispensing::runAndFindPosX(long &pos, unsigned long &speed)
+void Dispensing::runAndFindPosX(long &pos)
 {
     stepperX.enableOutputs();
     digitalWrite(this->ledPinX, HIGH);
-    stepperX.setSpeed(speed);
-    stepperX.move(pos);
-    while (stepperX.currentPosition() != pos)
+    stepperX.moveTo(pos);
+    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != pos)
     {
-        stepperX.runSpeed();
+        stepperX.run();
     }
     Serial.println("Stepper X position: " + String(stepperX.currentPosition()));
     stepperX.disableOutputs();
     digitalWrite(this->ledPinX, LOW);
 }
 
-void Dispensing::runAndFindPosZ(long &pos, unsigned long &speed)
+void Dispensing::runAndFindPosZ(long &pos)
 {
     stepperZ.enableOutputs();
     digitalWrite(this->ledPinZ, HIGH);
-    stepperZ.setSpeed(speed);
-    stepperZ.move(pos);
-    while (stepperZ.currentPosition() != pos)
+    stepperZ.moveTo(pos);
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != pos)
     {
-        stepperZ.runSpeed();
+        stepperZ.run();
     }
     Serial.println("Stepper Z position: " + String(stepperZ.currentPosition()));
     stepperZ.disableOutputs();
     digitalWrite(this->ledPinZ, LOW);
 }
 
-void Dispensing::runAndFindPosZp(long &pos, unsigned long &speed)
+void Dispensing::runAndFindPosZp(long &pos)
 {
     stepperZp.enableOutputs();
     digitalWrite(this->ledPinZp, HIGH);
-    stepperZp.setSpeed(speed);
-    stepperZp.move(pos);
-    while (stepperZp.currentPosition() != pos)
+    stepperZp.moveTo(pos);
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != pos)
     {
-        stepperZp.runSpeed();
+        stepperZp.run();
     }
     Serial.println("Stepper Z' position: " + String(stepperZp.currentPosition()));
     stepperZp.disableOutputs();
@@ -308,11 +285,10 @@ bool Dispensing::runToHomeX()
     {
         stepperX.enableOutputs();
         digitalWrite(this->ledPinX, HIGH);
-        stepperX.setSpeed(X_MAX_SPEED);
         stepperX.moveTo(X_HOME_POS);
-        while (stepperX.currentPosition() != X_HOME_POS)
+        while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_HOME_POS)
         {
-            stepperX.runSpeed();
+            stepperX.run();
         }
         stepperX.disableOutputs();
         digitalWrite(this->ledPinX, LOW);
@@ -322,7 +298,6 @@ bool Dispensing::runToHomeX()
     {
         Serial.println("Failed to run to home X!");
         return false;
-    
     }
 }
 
@@ -330,9 +305,8 @@ bool Dispensing::runToHomeZ()
 {
     stepperZ.enableOutputs();
     digitalWrite(this->ledPinZ, HIGH);
-    stepperZ.setSpeed(Z_MAX_SPEED);
     stepperZ.moveTo(Z_HOME_POS);
-    while (stepperZ.currentPosition() != Z_HOME_POS)
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_HOME_POS)
     {
         stepperZ.runSpeed();
     }
@@ -345,11 +319,10 @@ bool Dispensing::runToHomeZp()
 {
     stepperZp.enableOutputs();
     digitalWrite(this->ledPinZp, HIGH);
-    stepperZp.setSpeed(ZP_MAX_SPEED);
     stepperZp.moveTo(ZP_HOME_POS);
-    while (stepperZp.currentPosition() != ZP_HOME_POS)
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_HOME_POS)
     {
-        stepperZp.runSpeed();
+        stepperZp.run();
     }
     stepperZp.disableOutputs();
     digitalWrite(this->ledPinZp, LOW);
@@ -364,12 +337,7 @@ void Dispensing::serialCalibrationX()
     {
     }
     long pos = Serial.parseInt();
-    Serial.println("Enter the speed to move: ");
-    while (Serial.available() == 0)
-    {
-    }
-    unsigned long speed = Serial.parseInt();
-    this->runAndFindPosX(pos, speed);
+    this->runAndFindPosX(pos);
 }
 
 void Dispensing::serialCalibrationZ()
@@ -380,12 +348,7 @@ void Dispensing::serialCalibrationZ()
     {
     }
     long pos = Serial.parseInt();
-    Serial.println("Enter the speed to move: ");
-    while (Serial.available() == 0)
-    {
-    }
-    unsigned long speed = Serial.parseInt();
-    this->runAndFindPosZ(pos, speed);
+    this->runAndFindPosZ(pos);
 }
 
 void Dispensing::serialCalibrationZp()
@@ -396,25 +359,19 @@ void Dispensing::serialCalibrationZp()
     {
     }
     long pos = Serial.parseInt();
-    Serial.println("Enter the speed to move: ");
-    while (Serial.available() == 0)
-    {
-    }
-    unsigned long speed = Serial.parseInt();
-    this->runAndFindPosZp(pos, speed);
+    this->runAndFindPosZp(pos);
 }
 
 bool Dispensing::runToVialX()
 {
-    if (stepperX.currentPosition() == X_HOME_POS && stepperZ.currentPosition() == Z_HOME_POS)
+    if (stepperZ.currentPosition() == Z_HOME_POS)
     {
         stepperX.enableOutputs();
         digitalWrite(this->ledPinX, HIGH);
-        stepperX.setSpeed(X_MAX_SPEED);
         stepperX.moveTo(VIAL_X_POS);
-        while (stepperX.currentPosition() != VIAL_X_POS)
+        while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != VIAL_X_POS)
         {
-            stepperX.runSpeed();
+            stepperX.run();
         }
         stepperX.disableOutputs();
         digitalWrite(this->ledPinX, LOW);
@@ -433,11 +390,10 @@ bool Dispensing::runToVialZ()
     {
         stepperZ.enableOutputs();
         digitalWrite(this->ledPinZ, HIGH);
-        stepperZ.setSpeed(Z_MAX_SPEED);
         stepperZ.moveTo(VIAL_Z_POS);
-        while (stepperZ.currentPosition() != VIAL_Z_POS)
+        while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != VIAL_Z_POS)
         {
-            stepperZ.runSpeed();
+            stepperZ.run();
         }
         stepperZ.disableOutputs();
         digitalWrite(this->ledPinZ, LOW);
@@ -457,13 +413,12 @@ bool Dispensing::fillSyringe()
         Serial.println("Filling syringe ...");
         stepperZp.enableOutputs();
         digitalWrite(this->ledPinZp, HIGH);
-        stepperZp.setSpeed(ZP_MAX_SPEED);
         stepperZp.moveTo(this->sryingeFillingPosition);
-        while (stepperZp.currentPosition() != this->sryingeFillingPosition)
+        while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != this->sryingeFillingPosition)
         {
-            stepperZp.runSpeed();
+            stepperZp.run();
         }
-        Serial.println("Syringe volume: " + String(volume) + " uL");
+        Serial.println("Syringe volume: " + String(this->volume) + " uL");
         stepperZp.disableOutputs();
         digitalWrite(this->ledPinZp, LOW);
         return true;
@@ -477,16 +432,15 @@ bool Dispensing::fillSyringe()
 
 bool Dispensing::dispenseSyringe()
 {
-    if (this->fillSyringe() && stepperZp.currentPosition() == this->sryingeFillingPosition)
+    if (stepperZp.currentPosition() == this->sryingeFillingPosition)
     {
         Serial.println("Dispensing syringe ...");
         stepperZp.enableOutputs();
         digitalWrite(this->ledPinZp, HIGH);
-        stepperZp.setSpeed(ZP_MAX_SPEED);
         stepperZp.moveTo(SYRINGE_MIN_POS);
-        while (stepperZp.currentPosition() != SYRINGE_MIN_POS)
+        while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != SYRINGE_MIN_POS)
         {
-            stepperZp.runSpeed();
+            stepperZp.run();
         }
         stepperZp.disableOutputs();
         digitalWrite(this->ledPinZp, LOW);
@@ -506,11 +460,10 @@ bool Dispensing::emptySyringe()
         Serial.println("Emptying syringe ...");
         stepperZp.enableOutputs();
         digitalWrite(this->ledPinZp, HIGH);
-        stepperZp.setSpeed(ZP_MAX_SPEED);
-        stepperZp.moveTo(SYRINGE_MAX_POS);
-        while (stepperZp.currentPosition() != SYRINGE_MAX_POS)
+        stepperZp.moveTo(SYRINGE_MIN_POS);
+        while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != SYRINGE_MIN_POS)
         {
-            stepperZp.runSpeed();
+            stepperZp.run();
         }
         stepperZp.disableOutputs();
         digitalWrite(this->ledPinZp, LOW);
@@ -556,15 +509,14 @@ bool Dispensing::check(Mqtt &mqtt)
 
 bool Dispensing::runToCapsuleX(int &i)
 {
-    if (stepperX.currentPosition() == VIAL_X_POS && stepperZ.currentPosition() == Z_HOME_POS)    
+    if (stepperX.currentPosition() == VIAL_X_POS && stepperZ.currentPosition() == Z_HOME_POS)
     {
         stepperX.enableOutputs();
         digitalWrite(this->ledPinX, HIGH);
-        stepperX.setSpeed(X_MAX_SPEED);
         stepperX.moveTo(this->capsulePositionX[i]);
-        while (stepperX.currentPosition() != this->capsulePositionX[i])
+        while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != this->capsulePositionX[i])
         {
-            stepperX.runSpeed();
+            stepperX.run();
         }
         stepperX.disableOutputs();
         digitalWrite(this->ledPinX, LOW);
@@ -572,7 +524,7 @@ bool Dispensing::runToCapsuleX(int &i)
     }
     else
     {
-        Serial.println("Failed to run to capsule X!");
+        Serial.println("Failed to run to capsule " + String(i + 1) + " X!");
         return false;
     }
 }
@@ -583,11 +535,10 @@ bool Dispensing::runToCapsuleZ(int &i)
     {
         stepperZ.enableOutputs();
         digitalWrite(this->ledPinZ, HIGH);
-        stepperZ.setSpeed(Z_MAX_SPEED);
         stepperZ.moveTo(CAPSULE_Z_POS);
-        while (stepperZ.currentPosition() != CAPSULE_Z_POS)
+        while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != CAPSULE_Z_POS)
         {
-            stepperZ.runSpeed();
+            stepperZ.run();
         }
         stepperZ.disableOutputs();
         digitalWrite(this->ledPinZ, LOW);
@@ -595,7 +546,7 @@ bool Dispensing::runToCapsuleZ(int &i)
     }
     else
     {
-        Serial.println("Failed to run to capsule Z!");
+        Serial.println("Failed to run to capsule " + String(i + 1) + " Z!");
         return false;
     }
 }
@@ -634,77 +585,35 @@ void Dispensing::dispensing()
     {
         for (int i = 0; i < this->capsuleQty; i++)
         {
-            if (this->runToVialX())
+            if (this->runToVialX() && this->runToVialZ() && this->fillSyringe() && this->runToHomeZ() && this->runToCapsuleX(i) && this->runToCapsuleZ(i) && this->dispenseSyringe())
             {
-                if (this->runToVialZ())
+                Serial.println("Capsule " + String(i + 1) + " dispensed!");
+                if (this->runToHomeZ())
                 {
-                    if (this->fillSyringe())
+                    if (this->remainCapsule(i))
                     {
-                        if (this->runToHomeZ())
-                        {
-                            if (this->runToCapsuleX(i))
-                            {
-                                if (this->runToCapsuleZ(i))
-                                {
-                                    if (this->dispenseSyringe())
-                                    {
-                                        Serial.println("Capsule " + String(i+1) + " dispensed!");
-                                        if (this->runToHomeZ())
-                                        {
-                                            if (this->remainCapsule(i))
-                                            {
-                                                continue;
-                                            }
-                                            else
-                                            {
-                                                if (this->runToHomeX())
-                                                {
-                                                    break;
-                                                }
-                                                else
-                                                {
-                                                    Serial.println("Failed to run to home X!");
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Serial.println("Failed to run to home Z!");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Serial.println("Failed to dispense capsule " + String(i+1) + "!");
-                                    }
-                                }
-                                else
-                                {
-                                    Serial.println("Failed to run to capsule " + String(i+1) + " Z!");
-                                }
-                            }
-                            else
-                            {
-                                Serial.println("Failed to run to capsule " + String(i+1) + " X!");
-                            }
-                        }
-                        else
-                        {
-                            Serial.println("Failed to run to home Z!");
-                        }
+                        continue;
                     }
                     else
                     {
-                        Serial.println("Failed to fill syringe!");
+                        if (this->runToHomeX())
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            Serial.println("Failed to run to home X!");
+                        }
                     }
                 }
                 else
                 {
-                    Serial.println("Failed to run to vial Z!");
+                    Serial.println("Failed to run to home Z!");
                 }
             }
             else
             {
-                Serial.println("Failed to run to vial X!");
+                Serial.println("Failed to dispense capsule " + String(i + 1) + "!");
             }
         }
     }
@@ -722,7 +631,7 @@ void Dispensing::dummyDispensing()
     digitalWrite(this->solenoidPin, HIGH);
     for (int i = 0; i < this->capsuleQty; i++)
     {
-        Serial.println("Capsule " + String(i+1) + " dispensed!");
+        Serial.println("Capsule " + String(i + 1) + " dispensed!");
         delay(1000);
     }
     digitalWrite(this->solenoidPin, LOW);

@@ -16,29 +16,8 @@ byte msPins[] = {MS1_PIN, MS2_PIN};
 
 Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins, SOLENOID_PIN);
 
-void setup()
+void dispenseStart()
 {
-  Serial.begin(115200);
-  wifi.init();
-  mqtt.init();
-  if (mqtt.subscribe(DISPENSING_DATA_TOPIC))
-  {
-    Serial.println("Subscribed to topic dispensing/data!");
-  } 
-  else
-  {
-    Serial.println("Failed to subscribe to topic dispensing/data!");
-  }
-  dispensing.init();
-  // dispensing.homing();
-  dispensing.dummyHoming();
-}
-
-void loop()
-{
-  wifi.check();
-  mqtt.check();
-
   if (dispensing.check(mqtt))
   {
     JsonDocument doc;
@@ -77,4 +56,37 @@ void loop()
   {
     Serial.println("Failed to check dispensing!");
   }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  wifi.init();
+  mqtt.init();
+  if (mqtt.subscribe(DISPENSING_DATA_TOPIC))
+  {
+    Serial.println("Subscribed to topic dispensing/data!");
+  } 
+  else
+  {
+    Serial.println("Failed to subscribe to topic dispensing/data!");
+  }
+  dispensing.init();
+
+  // dispensing.homing();
+  // dispensing.dummyHoming();
+}
+
+void loop()
+{
+  wifi.check();
+  mqtt.check();
+
+  // dispensing.readLimitSwitch();
+
+  // dispensing.serialCalibrationX();
+  // dispensing.serialCalibrationZ();
+  // dispensing.serialCalibrationZp();
+
+  // dispenseStart();
 }

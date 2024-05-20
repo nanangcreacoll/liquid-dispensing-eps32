@@ -6,25 +6,40 @@
 #include <Mqtt.hpp>
 #include <ArduinoJson.h>
 
-#define MIRCROSTEPS 16 // 1/16 microsteps
+// #define DRIVER_TYPE DRV8825
+#define DRIVER_TYPE TMC2208
+
+#if defined(DRIVER_TYPE) && DRIVER_TYPE == TMC2208
+    #define MS1_STATE HIGH
+    #define MS2_STATE HIGH
+    #define DIRECTION_INVERT true
+#elif defined(DRIVER_TYPE) && DRIVER_TYPE == DRV8825
+    #define MS1_STATE LOW
+    #define MS2_STATE LOW
+    #define DIRECTION_INVERT false
+#endif
+
+#define MICROSTEPS 16 // 1/16 microsteps
 #define STEPS_PER_REV 200 // 1.8 degree per step
 
-#define X_ACCELERATION 500 // 500 steps/s^2
-#define Z_ACCELERATION 1250 // 1250 steps/s^2
-#define ZP_ACCELERATION 1250 // 1250 steps/s^2
+#define X_OFF_SET 640 // 640 steps
 
-#define X_MAX_SPEED 2000 // 2000 steps/s
-#define X_HOMING_SPEED 1000 // 1000 steps/s
+#define X_ACCELERATION 5000 // 5000 steps/s^2
+#define Z_ACCELERATION 5000 // 5000 steps/s^2
+#define ZP_ACCELERATION 5000 // 5000 steps/s^2
 
-#define Z_MAX_SPEED 5000 // 5000 steps/s
-#define Z_HOMING_SPEED 2500 // 2500 steps/s
+#define X_MAX_SPEED 7000 // 7000 steps/s
+#define X_HOMING_SPEED 4000 // 4000 steps/s
 
-#define ZP_MAX_SPEED 5000 // 5000 steps/s
-#define ZP_HOMING_SPEED 2500 // 2500 steps/s
+#define Z_MAX_SPEED 7000 // 7000 steps/s
+#define Z_HOMING_SPEED 4000 // 4000 steps/s
 
-#define X_HOME_POS 800 // 800 steps
-#define Z_HOME_POS 6400 // 6400 steps
-#define ZP_HOME_POS 6400 // 6400 steps
+#define ZP_MAX_SPEED 7000 // 7000 steps/s
+#define ZP_HOMING_SPEED 4000 // 4000 steps/s
+
+#define X_HOME_POS (STEPS_PER_REV * MICROSTEPS) / 4 // 800 steps 
+#define Z_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
+#define ZP_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
 
 #define VIAL_X_POS 0 // stepper X on vial position
 #define VIAL_Z_POS 0 // stepper Z on vial position
@@ -35,7 +50,7 @@
 #define CAPSULE_4_X_POS 0 // stepper X on capsule 4 position
 #define CAPSULE_5_X_POS 0 // stepper X on capsule 5 position
 
-#define CAPSULE_Z_POS 0 // stepper Z on capasule position
+#define CAPSULE_Z_POS 0 // stepper Z on capsule position
 
 #define SYRINGE_MIN_POS 38400 // syringe on empty position or 0 uL volume
 #define SYRINGE_MAX_POS 6400 // syringe on full position or 50 uL volume
@@ -124,9 +139,9 @@ public:
 
     // calibration methods
     void readLimitSwitch();
-    void runAndFindPosX(long &pos, unsigned long &speed);
-    void runAndFindPosZ(long &pos, unsigned long &speed);
-    void runAndFindPosZp(long &pos, unsigned long &speed);
+    void runAndFindPosX(long &pos);
+    void runAndFindPosZ(long &pos);
+    void runAndFindPosZp(long &pos);
     void serialCalibrationX();
     void serialCalibrationZ();
     void serialCalibrationZp();
