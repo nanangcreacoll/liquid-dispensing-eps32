@@ -104,6 +104,22 @@ void Dispensing::homeX()
     Serial.println("Stepper X on limit switch");
     stepperX.setCurrentPosition(0);
     delay(500);
+
+    stepperX.moveTo(X_OFF_SET);
+    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_OFF_SET)
+    {
+        stepperX.run();
+    }
+
+    stepperX.setSpeed(-X_SECOND_HOMING_SPEED);
+    while (digitalRead(this->limitSwitchPinX) != HIGH)
+    {
+        stepperX.runSpeed();
+    }
+    Serial.println("Stepper X on limit switch");
+    stepperX.setCurrentPosition(0);
+    delay(1000);
+
     stepperX.moveTo(X_OFF_SET);
     while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_OFF_SET)
     {
@@ -131,8 +147,30 @@ void Dispensing::homeZ()
     {
         stepperZ.runSpeed();
     }
-    delay(500);
     Serial.println("Stepper Z on limit switch");
+    stepperZ.setCurrentPosition(0);
+    delay(500);
+
+    stepperZ.moveTo(Z_OFF_SET);
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_OFF_SET)
+    {
+        stepperZ.run();
+    }
+    
+    stepperZ.setSpeed(-Z_SECOND_HOMING_SPEED);
+    while (digitalRead(this->limitSwitchPinZ) != HIGH)
+    {
+        stepperZ.runSpeed();
+    }
+    Serial.println("Stepper Z on limit switch");
+    stepperZ.setCurrentPosition(0);
+    delay(1000);
+    
+    stepperZ.moveTo(Z_OFF_SET);
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_OFF_SET)
+    {
+        stepperZ.run();
+    }
     stepperZ.setCurrentPosition(0);
 
     stepperZ.moveTo(Z_HOME_POS);
@@ -157,6 +195,32 @@ void Dispensing::homeZp()
     }
     delay(500);
     Serial.println("Stepper Z' on limit switch");
+    stepperZp.setCurrentPosition(0);
+
+    stepperZp.moveTo(ZP_OFF_SET);
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_OFF_SET)
+    {
+        stepperZp.run();
+    }
+
+    stepperZp.setSpeed(-ZP_SECOND_HOMING_SPEED);
+    while (digitalRead(this->limitSwitchPinZp) != HIGH)
+    {
+        stepperZp.runSpeed();
+    }
+    Serial.println("Stepper Z' on limit switch");
+    stepperZp.setCurrentPosition(0);
+    delay(1000);
+
+    Serial.println("Stepper X on limit switch");
+    stepperX.setCurrentPosition(0);
+    delay(500);
+
+    stepperZp.moveTo(ZP_OFF_SET);
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_OFF_SET)
+    {
+        stepperZp.run();
+    }
     stepperZp.setCurrentPosition(0);
 
     stepperZp.moveTo(ZP_HOME_POS);

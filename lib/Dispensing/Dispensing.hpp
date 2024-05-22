@@ -22,7 +22,9 @@
 #define MICROSTEPS 16 // 1/16 microsteps
 #define STEPS_PER_REV 200 // 1.8 degree per step
 
-#define X_OFF_SET 640 // 640 steps
+#define X_OFF_SET 600 // 600 steps
+#define Z_OFF_SET 3000 // 3000 steps
+#define ZP_OFF_SET 3000 // 3000 steps
 
 #define X_ACCELERATION 5000 // 5000 steps/s^2
 #define Z_ACCELERATION 5000 // 5000 steps/s^2
@@ -30,12 +32,15 @@
 
 #define X_MAX_SPEED 7000 // 7000 steps/s
 #define X_HOMING_SPEED 4000 // 4000 steps/s
+#define X_SECOND_HOMING_SPEED 2000 // 2000 steps/s
 
 #define Z_MAX_SPEED 7000 // 7000 steps/s
 #define Z_HOMING_SPEED 4000 // 4000 steps/s
+#define Z_SECOND_HOMING_SPEED 2000 // 2000 steps/s
 
 #define ZP_MAX_SPEED 7000 // 7000 steps/s
 #define ZP_HOMING_SPEED 4000 // 4000 steps/s
+#define ZP_SECOND_HOMING_SPEED 2000 // 2000 steps/s
 
 #define X_HOME_POS (STEPS_PER_REV * MICROSTEPS) / 4 // 800 steps 
 #define Z_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
