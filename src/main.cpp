@@ -58,6 +58,48 @@ void dispenseStart()
   }
 }
 
+void dispenseStartDummy()
+{
+  if (dispensing.check(mqtt))
+  {
+    JsonDocument doc;
+    doc["status"] = dispensing.getDispensingStatus();
+
+    if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+    {
+      Serial.println("Published to dispensing/status!");
+      Serial.println(doc.as<String>());
+
+      if (dispensing.startDummy())
+      {
+        Serial.println("Dispensing started!");
+        doc["status"] = dispensing.getDispensingStatus();
+        if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+        {
+          Serial.println("Published to dispensing/status!");
+          Serial.println(doc.as<String>());
+        }
+        else
+        {
+          Serial.println("Failed to publish to dispensing/status!");
+        }
+      }
+      else
+      {
+        Serial.println("Failed to start dispensing!");
+      }      
+    }
+    else
+    {
+      Serial.println("Failed to publish to dispensing/status!");
+    }
+  }
+  else
+  {
+    Serial.println("Failed to check dispensing!");
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -73,8 +115,15 @@ void setup()
   }
   dispensing.init();
 
-  // dispensing.homing();
-  // dispensing.dummyHoming();
+  #if defined(DISPENSING) && DISPENSING == 0
+    dispensing.dummyHoming();
+  #elif defined(DISPENSING) && DISPENSING == 1
+    dispensing.homing();
+  #elif defined(DISPENSING) && DISPENSING == 2
+    Serial.println("Serial calibration started!");
+  #else
+    Serial.println("Dispensing mode not defined!");
+  #endif
 }
 
 void loop()
@@ -82,11 +131,13 @@ void loop()
   wifi.check();
   mqtt.check();
 
-  // dispensing.readLimitSwitch();
-
-  // dispensing.serialCalibrationX();
-  // dispensing.serialCalibrationZ();
-  // dispensing.serialCalibrationZp();
-
-  // dispenseStart();
+  #if defined(DISPENSING) && DISPENSING == 0
+    dispenseStartDummy();
+  #elif defined(DISPENSING) && DISPENSING == 1
+    dispenseStart();
+  #elif defined(DISPENSING) && DISPENSING == 2
+    dispensing.serialCalibration();
+  #else
+    Serial.println("Dispensing mode not defined!");
+  #endif
 }

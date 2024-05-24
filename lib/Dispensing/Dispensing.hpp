@@ -6,18 +6,7 @@
 #include <Mqtt.hpp>
 #include <ArduinoJson.h>
 
-// #define DRIVER_TYPE DRV8825
-#define DRIVER_TYPE TMC2208
-
-#if defined(DRIVER_TYPE) && DRIVER_TYPE == TMC2208
-    #define MS1_STATE HIGH
-    #define MS2_STATE HIGH
-    #define DIRECTION_INVERT true
-#elif defined(DRIVER_TYPE) && DRIVER_TYPE == DRV8825
-    #define MS1_STATE LOW
-    #define MS2_STATE LOW
-    #define DIRECTION_INVERT false
-#endif
+#define DRIVER_TYPE 1 // 0 for TMC2208, 1 for DRV8825
 
 #define MICROSTEPS 16 // 1/16 microsteps
 #define STEPS_PER_REV 200 // 1.8 degree per step
@@ -65,6 +54,16 @@
 
 #define CAPSULE_MIN_QTY 0 // 0 capsule
 #define CAPSULE_MAX_QTY 5 // 5 capsules
+
+#if defined(DRIVER_TYPE) && DRIVER_TYPE == 0
+    #define MS1_STATE HIGH // MS1 pin state
+    #define MS2_STATE HIGH // MS2 pin state
+    #define DIRECTION_INVERT true // invert direction
+#elif defined(DRIVER_TYPE) && DRIVER_TYPE == 1
+    #define MS1_STATE LOW // MS1 pin state
+    #define MS2_STATE LOW // MS2 pin state
+    #define DIRECTION_INVERT false // invert direction
+#endif
 
 class Dispensing
 {
@@ -114,10 +113,6 @@ private:
     bool runToVialX();
     bool runToVialZ();
 
-    bool runToHomeX();
-    bool runToHomeZ();
-    bool runToHomeZp();
-
     bool runToCapsuleX(int &i);
     bool runToCapsuleZ(int &i);
 
@@ -125,6 +120,37 @@ private:
 
     void dispensing();
     void dummyDispensing();
+
+    float acceleration;
+    float maxSpeed;
+
+    long pos;
+    long distance;
+    long distanceReverse;
+
+protected:
+
+    // Calibration methods
+    bool runToHomeX();
+    bool runToHomeZ();
+    bool runToHomeZp();
+
+    void runAndMoveToPosX(long &pos);
+    void runAndMoveToPosZ(long &pos);
+    void runAndMoveToPosZp(long &pos);
+
+    void runAndMovePosX(long &distance);
+    void runAndMovePosZ(long &distance);
+    void runAndMovePosZp(long &distance);
+
+    void setMaxSpeedAndAccelerationX(float &maxSpeed, float &acceleration);
+    void setMaxSpeedAndAccelerationZ(float &maxSpeed, float &acceleration);
+    void setMaxSpeedAndAccelerationZp(float &maxSpeed, float &acceleration);
+
+    void readLimitSwitch();
+    void serialCalibrationX();
+    void serialCalibrationZ();
+    void serialCalibrationZp();
 
 public:
     Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[], const byte solenoidPin);
@@ -135,6 +161,7 @@ public:
     void dummyHoming();
     bool check(Mqtt &mqtt);
     bool start();
+    bool startDummy();
     bool getDispensingStatus();
 
     // test methods
@@ -143,13 +170,7 @@ public:
     void allLedAndSolenoidTest();
 
     // calibration methods
-    void readLimitSwitch();
-    void runAndFindPosX(long &pos);
-    void runAndFindPosZ(long &pos);
-    void runAndFindPosZp(long &pos);
-    void serialCalibrationX();
-    void serialCalibrationZ();
-    void serialCalibrationZp();
+    void serialCalibration();
 };
 
 #endif
