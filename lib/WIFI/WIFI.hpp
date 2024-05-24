@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-#define WIFI_TIMEOUT_MS 5000
-#define WIFI_CONNECTING_PERIOD 500
+#define WIFI_TIMEOUT_MS 5000 // 5 seconds
+#define WIFI_CONNECTING_PERIOD 500 // 0.5 seconds
 
 class WIFI
 {

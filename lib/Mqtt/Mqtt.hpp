@@ -5,8 +5,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-#define MQTT_TIMEOUT_MS 5000
-#define MQTT_CONNECTING_PERIOD 500
+#define MQTT_TIMEOUT_MS 5000 // 5 seconds
+#define MQTT_CONNECTING_PERIOD 500 // 0.5 seconds
 
 class Mqtt
 {

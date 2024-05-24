@@ -6,25 +6,34 @@
 #include <Mqtt.hpp>
 #include <ArduinoJson.h>
 
-#define MIRCROSTEPS 16 // 1/16 microsteps
+#define DRIVER_TYPE 1 // 0 for TMC2208, 1 for DRV8825
+
+#define MICROSTEPS 16 // 1/16 microsteps
 #define STEPS_PER_REV 200 // 1.8 degree per step
 
-#define X_ACCELERATION 500 // 500 steps/s^2
-#define Z_ACCELERATION 1250 // 1250 steps/s^2
-#define ZP_ACCELERATION 1250 // 1250 steps/s^2
+#define X_OFF_SET 600 // 600 steps
+#define Z_OFF_SET 3000 // 3000 steps
+#define ZP_OFF_SET 3000 // 3000 steps
 
-#define X_MAX_SPEED 2000 // 2000 steps/s
-#define X_HOMING_SPEED 1000 // 1000 steps/s
+#define X_ACCELERATION 5000 // 5000 steps/s^2
+#define Z_ACCELERATION 5000 // 5000 steps/s^2
+#define ZP_ACCELERATION 5000 // 5000 steps/s^2
 
-#define Z_MAX_SPEED 5000 // 5000 steps/s
-#define Z_HOMING_SPEED 2500 // 2500 steps/s
+#define X_MAX_SPEED 7000 // 7000 steps/s
+#define X_HOMING_SPEED 4000 // 4000 steps/s
+#define X_SECOND_HOMING_SPEED 2000 // 2000 steps/s
 
-#define ZP_MAX_SPEED 5000 // 5000 steps/s
-#define ZP_HOMING_SPEED 2500 // 2500 steps/s
+#define Z_MAX_SPEED 7000 // 7000 steps/s
+#define Z_HOMING_SPEED 4000 // 4000 steps/s
+#define Z_SECOND_HOMING_SPEED 2000 // 2000 steps/s
 
-#define X_HOME_POS 800 // 800 steps
-#define Z_HOME_POS 6400 // 6400 steps
-#define ZP_HOME_POS 6400 // 6400 steps
+#define ZP_MAX_SPEED 7000 // 7000 steps/s
+#define ZP_HOMING_SPEED 4000 // 4000 steps/s
+#define ZP_SECOND_HOMING_SPEED 2000 // 2000 steps/s
+
+#define X_HOME_POS (STEPS_PER_REV * MICROSTEPS) / 4 // 800 steps 
+#define Z_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
+#define ZP_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
 
 #define VIAL_X_POS 0 // stepper X on vial position
 #define VIAL_Z_POS 0 // stepper Z on vial position
@@ -35,7 +44,7 @@
 #define CAPSULE_4_X_POS 0 // stepper X on capsule 4 position
 #define CAPSULE_5_X_POS 0 // stepper X on capsule 5 position
 
-#define CAPSULE_Z_POS 0 // stepper Z on capasule position
+#define CAPSULE_Z_POS 0 // stepper Z on capsule position
 
 #define SYRINGE_MIN_POS 38400 // syringe on empty position or 0 uL volume
 #define SYRINGE_MAX_POS 6400 // syringe on full position or 50 uL volume
@@ -45,6 +54,16 @@
 
 #define CAPSULE_MIN_QTY 0 // 0 capsule
 #define CAPSULE_MAX_QTY 5 // 5 capsules
+
+#if defined(DRIVER_TYPE) && DRIVER_TYPE == 0
+    #define MS1_STATE HIGH // MS1 pin state
+    #define MS2_STATE HIGH // MS2 pin state
+    #define DIRECTION_INVERT true // invert direction
+#elif defined(DRIVER_TYPE) && DRIVER_TYPE == 1
+    #define MS1_STATE LOW // MS1 pin state
+    #define MS2_STATE LOW // MS2 pin state
+    #define DIRECTION_INVERT false // invert direction
+#endif
 
 class Dispensing
 {
@@ -94,10 +113,6 @@ private:
     bool runToVialX();
     bool runToVialZ();
 
-    bool runToHomeX();
-    bool runToHomeZ();
-    bool runToHomeZp();
-
     bool runToCapsuleX(int &i);
     bool runToCapsuleZ(int &i);
 
@@ -105,6 +120,37 @@ private:
 
     void dispensing();
     void dummyDispensing();
+
+    float acceleration;
+    float maxSpeed;
+
+    long pos;
+    long distance;
+    long distanceReverse;
+
+protected:
+
+    // Calibration methods
+    bool runToHomeX();
+    bool runToHomeZ();
+    bool runToHomeZp();
+
+    void runAndMoveToPosX(long &pos);
+    void runAndMoveToPosZ(long &pos);
+    void runAndMoveToPosZp(long &pos);
+
+    void runAndMovePosX(long &distance);
+    void runAndMovePosZ(long &distance);
+    void runAndMovePosZp(long &distance);
+
+    void setMaxSpeedAndAccelerationX(float &maxSpeed, float &acceleration);
+    void setMaxSpeedAndAccelerationZ(float &maxSpeed, float &acceleration);
+    void setMaxSpeedAndAccelerationZp(float &maxSpeed, float &acceleration);
+
+    void readLimitSwitch();
+    void serialCalibrationX();
+    void serialCalibrationZ();
+    void serialCalibrationZp();
 
 public:
     Dispensing(const byte pinsX[], const byte pinsZ[], const byte pinsZp[], const byte msPins[], const byte solenoidPin);
@@ -115,6 +161,7 @@ public:
     void dummyHoming();
     bool check(Mqtt &mqtt);
     bool start();
+    bool startDummy();
     bool getDispensingStatus();
 
     // test methods
@@ -123,13 +170,7 @@ public:
     void allLedAndSolenoidTest();
 
     // calibration methods
-    void readLimitSwitch();
-    void runAndFindPosX(long &pos, unsigned long &speed);
-    void runAndFindPosZ(long &pos, unsigned long &speed);
-    void runAndFindPosZp(long &pos, unsigned long &speed);
-    void serialCalibrationX();
-    void serialCalibrationZ();
-    void serialCalibrationZp();
+    void serialCalibration();
 };
 
 #endif
