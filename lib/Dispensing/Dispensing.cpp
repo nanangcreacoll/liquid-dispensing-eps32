@@ -854,17 +854,9 @@ bool Dispensing::check(Mqtt &mqtt)
             this->status = false;
             return true;
         }
-        else
-        {
-            Serial.println("Invalid message format!");
-            mqtt.clearSubMessage();
-            return false;
-        }
     }
-    else
-    {
-        return false;
-    }
+    mqtt.clearSubMessage();
+    return false;
 }
 
 bool Dispensing::runToCapsuleX(int &i)
@@ -938,9 +930,17 @@ bool Dispensing::start()
 
 bool Dispensing::startDummy()
 {
-    this->dummyHoming();
-    this->status = true;
-    return true;
+    if (this->volume > SYRINGE_MIN_VOLUME && this->volume <= SYRINGE_MAX_VOLUME && this->capsuleQty > CAPSULE_MIN_QTY && this->capsuleQty <= CAPSULE_MAX_QTY)
+    {
+        this->dummyDispensing();
+        this->status = true;
+        return true;
+    }
+    else
+    {
+        Serial.println("Invalid volume or capsule quantity!");
+        return false;
+    }
 }
 
 void Dispensing::dispensing()

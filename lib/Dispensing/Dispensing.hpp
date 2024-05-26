@@ -55,6 +55,8 @@
 #define CAPSULE_MIN_QTY 0 // 0 capsule
 #define CAPSULE_MAX_QTY 5 // 5 capsules
 
+#define DISPENSING_CHECK_PERIOD 1000 // 1 second
+
 #if defined(DRIVER_TYPE) && DRIVER_TYPE == 0
     #define MS1_STATE HIGH // MS1 pin state
     #define MS2_STATE HIGH // MS2 pin state
@@ -127,6 +129,8 @@ private:
     long pos;
     long distance;
     long distanceReverse;
+
+    unsigned long lastCheck = 0;
 
 protected:
 
