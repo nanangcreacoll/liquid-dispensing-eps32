@@ -16,9 +16,12 @@ byte msPins[] = {MS1_PIN, MS2_PIN};
 
 Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins, SOLENOID_PIN);
 
+unsigned long lastCheck = 0;
+bool checked = true;
+
 void dispenseStart()
 {
-  if (dispensing.check(mqtt))
+  if (dispensing.check(mqtt) && checked)
   {
     JsonDocument doc;
     doc["status"] = dispensing.getDispensingStatus();
@@ -51,16 +54,22 @@ void dispenseStart()
     {
       Serial.println("Failed to publish to dispensing/status!");
     }
+    checked = false;
   }
   else
   {
-    Serial.println("Failed to check dispensing!");
+    if (millis() - lastCheck >= CHECK_PERIOD)
+    {
+      Serial.println("Waiting for dispensing check!");
+      lastCheck = millis();
+    }
+    checked = true;
   }
 }
 
 void dispenseStartDummy()
 {
-  if (dispensing.check(mqtt))
+  if (dispensing.check(mqtt) && checked)
   {
     JsonDocument doc;
     doc["status"] = dispensing.getDispensingStatus();
@@ -93,10 +102,16 @@ void dispenseStartDummy()
     {
       Serial.println("Failed to publish to dispensing/status!");
     }
+    checked = false;
   }
   else
   {
-    Serial.println("Failed to check dispensing!");
+    if (millis() - lastCheck >= CHECK_PERIOD)
+    {
+      Serial.println("Waiting for dispensing check!");
+      lastCheck = millis();
+    }
+    checked = true;
   }
 }
 

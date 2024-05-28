@@ -72,9 +72,14 @@ void Mqtt::connect()
 
 void Mqtt::check()
 {
-    if (!pubSubClient.connected())
+    if (!pubSubClient.connected() && !this->connection)
     {
         this->connect();
+        this->connection = true;
+    }
+    else if (pubSubClient.connected() && this->connection)
+    {
+        this->connection = false;
     }
     pubSubClient.loop();
 }

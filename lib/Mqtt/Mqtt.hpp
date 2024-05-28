@@ -24,6 +24,8 @@ private:
     String subTopic;
     String subMessage;
 
+    bool connection = false;
+
 public:
     Mqtt(const char* server, unsigned int port, const char* clientId, const char* username = NULL, const char* password = NULL);
     void init();
