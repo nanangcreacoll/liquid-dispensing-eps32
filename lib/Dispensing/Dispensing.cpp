@@ -52,13 +52,13 @@ void Dispensing::init()
     Serial.println("Using Microsteps: " + String(MICROSTEPS));
 
     stepperX.setEnablePin(this->enablePinX);
-    stepperX.setPinsInverted(DIRECTION_INVERT, false, true);
+    stepperX.setPinsInverted(DIRECTION_INVERT, false, ENABLE_INVERT);
 
     stepperZ.setEnablePin(this->enablePinZ);
-    stepperZ.setPinsInverted(DIRECTION_INVERT, false, true);
+    stepperZ.setPinsInverted(DIRECTION_INVERT, false, ENABLE_INVERT);
 
     stepperZp.setEnablePin(this->enablePinZp);
-    stepperZp.setPinsInverted(DIRECTION_INVERT, false, true);
+    stepperZp.setPinsInverted(DIRECTION_INVERT, false, ENABLE_INVERT);
 
     stepperX.setMaxSpeed(X_MAX_SPEED);
     stepperX.setAcceleration(X_ACCELERATION);
@@ -103,9 +103,9 @@ void Dispensing::homeX()
     }
     Serial.println("Stepper X on limit switch");
     stepperX.setCurrentPosition(0);
-    delay(500);
+    delay(1000);
 
-    stepperX.moveTo(X_OFF_SET);
+    stepperX.moveTo(X_HOME_PULL_BACK);
     while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_OFF_SET)
     {
         stepperX.run();
@@ -126,6 +126,7 @@ void Dispensing::homeX()
         stepperX.run();
     }
     stepperX.setCurrentPosition(0);
+    delay(500);
 
     stepperX.moveTo(X_HOME_POS);
     while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_HOME_POS)
@@ -149,9 +150,9 @@ void Dispensing::homeZ()
     }
     Serial.println("Stepper Z on limit switch");
     stepperZ.setCurrentPosition(0);
-    delay(500);
+    delay(1000);
 
-    stepperZ.moveTo(Z_OFF_SET);
+    stepperZ.moveTo(Z_HOME_PULL_BACK);
     while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_OFF_SET)
     {
         stepperZ.run();
@@ -172,6 +173,7 @@ void Dispensing::homeZ()
         stepperZ.run();
     }
     stepperZ.setCurrentPosition(0);
+    delay(500);
 
     stepperZ.moveTo(Z_HOME_POS);
     while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_HOME_POS)
@@ -193,11 +195,11 @@ void Dispensing::homeZp()
     {
         stepperZp.runSpeed();
     }
-    delay(500);
+    delay(1000);
     Serial.println("Stepper Z' on limit switch");
     stepperZp.setCurrentPosition(0);
 
-    stepperZp.moveTo(ZP_OFF_SET);
+    stepperZp.moveTo(ZP_HOME_PULL_BACK);
     while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_OFF_SET)
     {
         stepperZp.run();
@@ -212,16 +214,13 @@ void Dispensing::homeZp()
     stepperZp.setCurrentPosition(0);
     delay(1000);
 
-    Serial.println("Stepper X on limit switch");
-    stepperX.setCurrentPosition(0);
-    delay(500);
-
     stepperZp.moveTo(ZP_OFF_SET);
     while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_OFF_SET)
     {
         stepperZp.run();
     }
     stepperZp.setCurrentPosition(0);
+    delay(500);
 
     stepperZp.moveTo(ZP_HOME_POS);
     while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_HOME_POS)
@@ -401,7 +400,7 @@ bool Dispensing::runToHomeX()
     }
     else
     {
-        Serial.println("Failed to run to home X!");
+        Serial.println("Failed to run to home X with Z position not at home!");
         return false;
     }
 }
@@ -413,7 +412,7 @@ bool Dispensing::runToHomeZ()
     stepperZ.moveTo(Z_HOME_POS);
     while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_HOME_POS)
     {
-        stepperZ.runSpeed();
+        stepperZ.run();
     }
     stepperZ.disableOutputs();
     digitalWrite(this->ledPinZ, LOW);
@@ -455,11 +454,11 @@ void Dispensing::setMaxSpeedAndAccelerationZp(float &maxSpeed, float &accelerati
 void Dispensing::serialCalibrationX()
 {
     Serial.println("\nStepper X calibration.");
-    Serial.println("1. Set max speed and acceleration");
-    Serial.println("2. Move to home position");
-    Serial.println("3. Move to position");
-    Serial.println("4. Move distance");
-    Serial.println("5. Move distance reverse");
+    Serial.println("\t1. Set max speed and acceleration");
+    Serial.println("\t2. Move to home position");
+    Serial.println("\t3. Move to position");
+    Serial.println("\t4. Move distance");
+    Serial.println("\t5. Move distance reverse");
     Serial.println("Enter the option: ");
     while (Serial.available() == 0)
     {
@@ -516,7 +515,7 @@ void Dispensing::serialCalibrationX()
 
 void Dispensing::serialCalibrationZ()
 {
-    Serial.println("\ntepper Z calibration.");
+    Serial.println("\nStepper Z calibration.");
     Serial.println("\t1. Set max speed and acceleration");
     Serial.println("\t2. Move to home position");
     Serial.println("\t3. Move to position");
@@ -640,7 +639,7 @@ void Dispensing::serialCalibrationZp()
 
 void Dispensing::serialCalibration()
 {
-    Serial.println("\nCalibration.");
+    Serial.println("\nSerial calibration.");
     Serial.println("\t1. Stepper X");
     Serial.println("\t2. Stepper Z");
     Serial.println("\t3. Stepper Z'");

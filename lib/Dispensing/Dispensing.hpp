@@ -6,34 +6,37 @@
 #include <Mqtt.hpp>
 #include <ArduinoJson.h>
 
-#define DRIVER_TYPE 1 // 0 for TMC2208, 1 for DRV8825
+#define DRIVER_TYPE 0 // 0 for TMC2208, 1 for DRV8825
 
 #define MICROSTEPS 16 // 1/16 microsteps
-#define STEPS_PER_REV 200 // 1.8 degree per step
 
 #define X_OFF_SET 600 // 600 steps
-#define Z_OFF_SET 3000 // 3000 steps
-#define ZP_OFF_SET 3000 // 3000 steps
+#define Z_OFF_SET 4000 // 4000 steps
+#define ZP_OFF_SET 4000 // 4000 steps
+
+#define X_HOME_PULL_BACK 3200 // 3200 steps
+#define Z_HOME_PULL_BACK 6400 // 6400 steps
+#define ZP_HOME_PULL_BACK 6400 // 6400 steps
 
 #define X_ACCELERATION 5000 // 5000 steps/s^2
-#define Z_ACCELERATION 5000 // 5000 steps/s^2
-#define ZP_ACCELERATION 5000 // 5000 steps/s^2
+#define Z_ACCELERATION 8000 // 8000 steps/s^2
+#define ZP_ACCELERATION 8000 // 8000 steps/s^2
 
 #define X_MAX_SPEED 7000 // 7000 steps/s
-#define X_HOMING_SPEED 4000 // 4000 steps/s
-#define X_SECOND_HOMING_SPEED 2000 // 2000 steps/s
+#define X_HOMING_SPEED 2000 // 4000 steps/s
+#define X_SECOND_HOMING_SPEED 1000 // 1000 steps/s
 
-#define Z_MAX_SPEED 7000 // 7000 steps/s
-#define Z_HOMING_SPEED 4000 // 4000 steps/s
-#define Z_SECOND_HOMING_SPEED 2000 // 2000 steps/s
+#define Z_MAX_SPEED 10000 // 7000 steps/s
+#define Z_HOMING_SPEED 8000 // 8000 steps/s
+#define Z_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
-#define ZP_MAX_SPEED 7000 // 7000 steps/s
-#define ZP_HOMING_SPEED 4000 // 4000 steps/s
-#define ZP_SECOND_HOMING_SPEED 2000 // 2000 steps/s
+#define ZP_MAX_SPEED 10000 // 7000 steps/s
+#define ZP_HOMING_SPEED 8000 // 8000 steps/s
+#define ZP_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
-#define X_HOME_POS (STEPS_PER_REV * MICROSTEPS) / 4 // 800 steps 
-#define Z_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
-#define ZP_HOME_POS (STEPS_PER_REV * MICROSTEPS) * 2 // 6400 steps
+#define X_HOME_POS 800 // 800 steps
+#define Z_HOME_POS 6400 // 6400 steps
+#define ZP_HOME_POS 6400 // 6400 steps
 
 #define VIAL_X_POS 0 // stepper X on vial position
 #define VIAL_Z_POS 0 // stepper Z on vial position
@@ -60,11 +63,13 @@
 #if defined(DRIVER_TYPE) && DRIVER_TYPE == 0
     #define MS1_STATE HIGH // MS1 pin state
     #define MS2_STATE HIGH // MS2 pin state
-    #define DIRECTION_INVERT true // invert direction
+    #define DIRECTION_INVERT false // invert direction
+    #define ENABLE_INVERT true // invert enable
 #elif defined(DRIVER_TYPE) && DRIVER_TYPE == 1
     #define MS1_STATE LOW // MS1 pin state
     #define MS2_STATE LOW // MS2 pin state
     #define DIRECTION_INVERT false // invert direction
+    #define ENABLE_INVERT true // invert enable
 #endif
 
 class Dispensing
