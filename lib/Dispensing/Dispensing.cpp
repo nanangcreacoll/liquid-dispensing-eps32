@@ -649,6 +649,8 @@ void Dispensing::serialCalibration()
     Serial.println("\t7. Read limit switch");
     Serial.println("\t8. Homing all steppers");
     Serial.println("Enter the option to calibrate: ");
+    Serial.println();
+    Serial.println("\n\t0. Reset");
     while (Serial.available() == 0)
     {
     }
@@ -714,6 +716,11 @@ void Dispensing::serialCalibration()
         break;
     case 8:
         this->homing();
+        break;
+    case 0:
+        Serial.println("Resetting in 3 seconds ...");
+        delay(3000);
+        ESP.restart();
         break;
     default:
         Serial.println("Invalid option!");
@@ -1011,3 +1018,5 @@ void Dispensing::dummyHoming()
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Dummy homing completed!");
 }
+
+Dispensing::~Dispensing() {}
