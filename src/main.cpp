@@ -17,7 +17,7 @@ byte msPins[] = {MS1_PIN, MS2_PIN};
 Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins, SOLENOID_PIN);
 
 unsigned long lastCheck = 0;
-bool checked = true;
+bool checked = false;
 
 void dispenseStart()
 {
