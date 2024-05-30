@@ -84,10 +84,9 @@ void Mqtt::check()
     pubSubClient.loop();
 }
 
-bool Mqtt::clearSubMessage()
+void Mqtt::clearSubMessage()
 {
     this->subMessage = "";
-    return true;
 }
 
 String Mqtt::getPubMessage()

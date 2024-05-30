@@ -180,6 +180,9 @@ public:
 
     // calibration methods
     void serialCalibration();
+
+    // Destructor
+    ~Dispensing();
 };
 
 #endif

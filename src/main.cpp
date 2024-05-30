@@ -17,7 +17,7 @@ byte msPins[] = {MS1_PIN, MS2_PIN};
 Dispensing dispensing(pinsX, pinsZ, pinsZp, msPins, SOLENOID_PIN);
 
 unsigned long lastCheck = 0;
-bool checked = true;
+bool checked = false;
 
 void dispenseStart()
 {
@@ -28,8 +28,8 @@ void dispenseStart()
 
     if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
     {
-      Serial.println("Published to dispensing/status!");
-      Serial.println(doc.as<String>());
+      Serial.println("Published to " + mqtt.getPubTopic() + "!");
+      Serial.println(mqtt.getPubMessage());
 
       if (dispensing.start())
       {
@@ -37,12 +37,12 @@ void dispenseStart()
         doc["status"] = dispensing.getDispensingStatus();
         if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
         {
-          Serial.println("Published to dispensing/status!");
-          Serial.println(doc.as<String>());
+          Serial.println("Published to " + mqtt.getPubTopic() + "!");
+          Serial.println(mqtt.getPubMessage());
         }
         else
         {
-          Serial.println("Failed to publish to dispensing/status!");
+          Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
         }
       }
       else
@@ -52,7 +52,7 @@ void dispenseStart()
     }
     else
     {
-      Serial.println("Failed to publish to dispensing/status!");
+      Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
     }
     checked = false;
   }
@@ -76,8 +76,8 @@ void dispenseStartDummy()
 
     if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
     {
-      Serial.println("Published to dispensing/status!");
-      Serial.println(doc.as<String>());
+      Serial.println("Published to " + mqtt.getPubTopic() + "!");
+      Serial.println(mqtt.getPubMessage());
 
       if (dispensing.startDummy())
       {
@@ -85,12 +85,12 @@ void dispenseStartDummy()
         doc["status"] = dispensing.getDispensingStatus();
         if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
         {
-          Serial.println("Published to dispensing/status!");
-          Serial.println(doc.as<String>());
+          Serial.println("Published to " + mqtt.getPubTopic() + "!");
+          Serial.println(mqtt.getPubMessage());
         }
         else
         {
-          Serial.println("Failed to publish to dispensing/status!");
+          Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
         }
       }
       else
@@ -100,7 +100,7 @@ void dispenseStartDummy()
     }
     else
     {
-      Serial.println("Failed to publish to dispensing/status!");
+      Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
     }
     checked = false;
   }
@@ -122,11 +122,11 @@ void setup()
   mqtt.init();
   if (mqtt.subscribe(DISPENSING_DATA_TOPIC))
   {
-    Serial.println("Subscribed to topic dispensing/data!");
+    Serial.println("Subscribed to topic " + mqtt.getSubTopic() + "!");
   } 
   else
   {
-    Serial.println("Failed to subscribe to topic dispensing/data!");
+    Serial.println("Failed to subscribe to topic " + mqtt.getSubTopic() + "!");
   }
   dispensing.init();
 
