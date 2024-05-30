@@ -34,7 +34,7 @@ public:
     bool publish(const char* topic, const char* message);
     void connect();
     void check();
-    bool clearSubMessage();
+    void clearSubMessage();
     String getSubMessage();
     String getSubTopic();
     String getPubMessage();
