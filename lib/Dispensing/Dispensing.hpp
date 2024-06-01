@@ -19,18 +19,18 @@
 #define ZP_HOME_PULL_BACK 6400 // 6400 steps
 
 #define X_ACCELERATION 5000 // 5000 steps/s^2
-#define Z_ACCELERATION 8000 // 8000 steps/s^2
-#define ZP_ACCELERATION 8000 // 8000 steps/s^2
+#define Z_ACCELERATION 12000 // 8000 steps/s^2
+#define ZP_ACCELERATION 12000 // 8000 steps/s^2
 
 #define X_MAX_SPEED 7000 // 7000 steps/s
 #define X_HOMING_SPEED 2000 // 4000 steps/s
 #define X_SECOND_HOMING_SPEED 1000 // 1000 steps/s
 
-#define Z_MAX_SPEED 10000 // 7000 steps/s
+#define Z_MAX_SPEED 15000 // 7000 steps/s
 #define Z_HOMING_SPEED 8000 // 8000 steps/s
 #define Z_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
-#define ZP_MAX_SPEED 10000 // 7000 steps/s
+#define ZP_MAX_SPEED 15000 // 7000 steps/s
 #define ZP_HOMING_SPEED 8000 // 8000 steps/s
 #define ZP_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
@@ -38,19 +38,23 @@
 #define Z_HOME_POS 6400 // 6400 steps
 #define ZP_HOME_POS 6400 // 6400 steps
 
-#define VIAL_X_POS 0 // stepper X on vial position
-#define VIAL_Z_POS 0 // stepper Z on vial position
+#define X_STEPS_PER_MM 100 // 100 steps/mm
+#define Z_STEPS_PER_MM 3200 // 3200 steps/mm
+#define ZP_STEPS_PER_MM 3200 // 3200 steps/mm
 
-#define CAPSULE_1_X_POS 0 // stepper X on capsule 1 position
-#define CAPSULE_2_X_POS 0 // stepper X on capsule 2 position
-#define CAPSULE_3_X_POS 0 // stepper X on capsule 3 position
-#define CAPSULE_4_X_POS 0 // stepper X on capsule 4 position
-#define CAPSULE_5_X_POS 0 // stepper X on capsule 5 position
+#define VIAL_X_POS 1600 // stepper X on vial position
+#define VIAL_Z_POS 230400 // stepper Z on vial position
 
-#define CAPSULE_Z_POS 0 // stepper Z on capsule position
+#define CAPSULE_1_X_POS 4500 // stepper X on capsule 1 position
+#define CAPSULE_2_X_POS 6000 // stepper X on capsule 2 position
+#define CAPSULE_3_X_POS 7500 // stepper X on capsule 3 position
+#define CAPSULE_4_X_POS 9000 // stepper X on capsule 4 position
+#define CAPSULE_5_X_POS 10500 // stepper X on capsule 5 position
 
-#define SYRINGE_MIN_POS 38400 // syringe on empty position or 0 uL volume
-#define SYRINGE_MAX_POS 6400 // syringe on full position or 50 uL volume
+#define CAPSULE_Z_POS 118400 // stepper Z on capsule position
+
+#define SYRINGE_MIN_POS 211200 // syringe on empty position or 0 uL volume
+#define SYRINGE_MAX_POS 51200 // syringe on full position or 50 uL volume
 
 #define SYRINGE_MIN_VOLUME 0 // 0 uL
 #define SYRINGE_MAX_VOLUME 50 // 50 uL
@@ -106,7 +110,7 @@ private:
     int capsuleQty = 0;
     bool status = true;
 
-    long sryingeFillingPosition = map(volume, SYRINGE_MIN_VOLUME, SYRINGE_MAX_VOLUME, SYRINGE_MIN_POS, SYRINGE_MAX_POS);
+    long sryingeFillingPosition = map(this->volume, SYRINGE_MIN_VOLUME, SYRINGE_MAX_VOLUME, SYRINGE_MIN_POS, SYRINGE_MAX_POS);
     long capsulePositionX[5] = {CAPSULE_1_X_POS, CAPSULE_2_X_POS, CAPSULE_3_X_POS, CAPSULE_4_X_POS, CAPSULE_5_X_POS}; 
     
     bool fillSyringe();
