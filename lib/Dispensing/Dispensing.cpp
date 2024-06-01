@@ -106,10 +106,11 @@ void Dispensing::homeX()
     delay(1000);
 
     stepperX.moveTo(X_HOME_PULL_BACK);
-    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_OFF_SET)
+    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_HOME_PULL_BACK)
     {
         stepperX.run();
     }
+    delay(1000);
 
     stepperX.setSpeed(-X_SECOND_HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinX) != HIGH)
@@ -153,10 +154,11 @@ void Dispensing::homeZ()
     delay(1000);
 
     stepperZ.moveTo(Z_HOME_PULL_BACK);
-    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_OFF_SET)
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_HOME_POS)
     {
         stepperZ.run();
     }
+    delay(1000);
     
     stepperZ.setSpeed(-Z_SECOND_HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinZ) != HIGH)
@@ -200,10 +202,11 @@ void Dispensing::homeZp()
     stepperZp.setCurrentPosition(0);
 
     stepperZp.moveTo(ZP_HOME_PULL_BACK);
-    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_OFF_SET)
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_HOME_PULL_BACK)
     {
         stepperZp.run();
     }
+    delay(1000);
 
     stepperZp.setSpeed(-ZP_SECOND_HOMING_SPEED);
     while (digitalRead(this->limitSwitchPinZp) != HIGH)
@@ -277,10 +280,10 @@ void Dispensing::solenoidTest()
 {
     digitalWrite(this->solenoidPin, HIGH);
     Serial.println("Solenoid ON");
-    delay(1000);
+    delay(5000);
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Solenoid OFF");
-    delay(1000);
+    delay(5000);
 }
 
 void Dispensing::allLedAndSolenoidTest()
@@ -290,13 +293,13 @@ void Dispensing::allLedAndSolenoidTest()
     digitalWrite(this->ledPinZp, HIGH);
     digitalWrite(this->solenoidPin, HIGH);
     Serial.println("LEDs and Solenoid ON");
-    delay(1000);
+    delay(5000);
     digitalWrite(this->ledPinX, LOW);
     digitalWrite(this->ledPinZ, LOW);
     digitalWrite(this->ledPinZp, LOW);
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("LEDs and Solenoid OFF");
-    delay(1000);
+    delay(5000);
 }
 
 void Dispensing::runAndMoveToPosX(long &pos)
@@ -463,7 +466,7 @@ void Dispensing::serialCalibrationX()
     while (Serial.available() == 0)
     {
     }
-    int option = Serial.parseInt();
+    int option = Serial.readStringUntil('\r\n').toInt();
     switch (option)
     {
     case 1:
@@ -525,7 +528,7 @@ void Dispensing::serialCalibrationZ()
     while (Serial.available() == 0)
     {
     }
-    int option = Serial.parseInt();
+    int option = Serial.readStringUntil('\r\n').toInt();
     switch (option)
     {
     case 1:
@@ -587,7 +590,7 @@ void Dispensing::serialCalibrationZp()
     while (Serial.available() == 0)
     {
     }
-    int option = Serial.parseInt();
+    int option = Serial.readStringUntil('\r\n').toInt();
     switch (option)
     {
     case 1:
@@ -648,13 +651,12 @@ void Dispensing::serialCalibration()
     Serial.println("\t6. All led and solenoid test");
     Serial.println("\t7. Read limit switch");
     Serial.println("\t8. Homing all steppers");
+    Serial.println("\t9. Reset");
     Serial.println("Enter the option to calibrate: ");
-    Serial.println();
-    Serial.println("\n\t0. Reset");
     while (Serial.available() == 0)
     {
     }
-    int option = Serial.parseInt();
+    int option = Serial.readStringUntil('\r\n').toInt();
     switch (option)
     {
     case 1:
@@ -717,7 +719,7 @@ void Dispensing::serialCalibration()
     case 8:
         this->homing();
         break;
-    case 0:
+    case 9:
         Serial.println("Resetting in 3 seconds ...");
         delay(3000);
         ESP.restart();
@@ -743,6 +745,11 @@ bool Dispensing::runToVialX()
         digitalWrite(this->ledPinX, LOW);
         return true;
     }
+    else if (stepperZ.currentPosition() == VIAL_Z_POS && stepperX.currentPosition() == VIAL_X_POS)
+    {
+        Serial.println("Already at vial X!");
+        return true;
+    }
     else
     {
         Serial.println("Failed to run to vial X!");
@@ -763,6 +770,11 @@ bool Dispensing::runToVialZ()
         }
         stepperZ.disableOutputs();
         digitalWrite(this->ledPinZ, LOW);
+        return true;
+    }
+    else if (stepperZ.currentPosition() == VIAL_Z_POS && stepperX.currentPosition() == VIAL_X_POS)
+    {
+        Serial.println("Already at vial Z!");
         return true;
     }
     else
@@ -821,7 +833,7 @@ bool Dispensing::dispenseSyringe()
 
 bool Dispensing::emptySyringe()
 {
-    if (stepperX.currentPosition() == VIAL_X_POS && stepperZp.currentPosition() == ZP_HOME_POS)
+    if (stepperX.currentPosition() == VIAL_X_POS && stepperZ.currentPosition() == VIAL_Z_POS && stepperZp.currentPosition() == ZP_HOME_POS)
     {
         Serial.println("Emptying syringe ...");
         stepperZp.enableOutputs();
@@ -923,7 +935,7 @@ bool Dispensing::start()
 {
     if (this->volume > SYRINGE_MIN_VOLUME && this->volume <= SYRINGE_MAX_VOLUME && this->capsuleQty > CAPSULE_MIN_QTY && this->capsuleQty <= CAPSULE_MAX_QTY)
     {
-        this->dummyDispensing();
+        this->dispensing();
         this->status = true;
         return true;
     }
@@ -953,7 +965,7 @@ void Dispensing::dispensing()
 {
     Serial.println("Dispensing capsule ...");
     digitalWrite(this->solenoidPin, HIGH);
-    if (this->emptySyringe())
+    if (this->runToVialX() && this->runToVialZ() && this->emptySyringe())
     {
         for (int i = 0; i < this->capsuleQty; i++)
         {
