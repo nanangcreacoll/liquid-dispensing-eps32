@@ -81,15 +81,14 @@ void Dispensing::homing()
 {
     Serial.println("Homing stepper motors ...");
     digitalWrite(this->solenoidPin, HIGH);
-
-    this->homeZ();
     
+    this->homeZ();
     this->homeX();
-
     this->homeZp();
 
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Stepper motors homed!");
+    this->status = true;
 }
 
 void Dispensing::homeX()
@@ -791,14 +790,15 @@ bool Dispensing::fillSyringe()
         Serial.println("Filling syringe ...");
         stepperZp.enableOutputs();
         digitalWrite(this->ledPinZp, HIGH);
-        stepperZp.moveTo(this->sryingeFillingPosition);
-        while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != this->sryingeFillingPosition)
+        stepperZp.move(-this->syringeMove);
+        while (stepperZp.distanceToGo() != 0)
         {
             stepperZp.run();
         }
         Serial.println("Syringe volume: " + String(this->volume) + " uL");
         stepperZp.disableOutputs();
         digitalWrite(this->ledPinZp, LOW);
+        delay(500);
         return true;
     }
     else
@@ -810,30 +810,44 @@ bool Dispensing::fillSyringe()
 
 bool Dispensing::dispenseSyringe()
 {
-    if (stepperZp.currentPosition() == this->sryingeFillingPosition)
+    Serial.println("Dispensing syringe ...");
+    stepperZp.enableOutputs();
+    digitalWrite(this->ledPinZp, HIGH);
+    stepperZp.moveTo(SYRINGE_MIN_POS);
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != SYRINGE_MIN_POS)
     {
-        Serial.println("Dispensing syringe ...");
-        stepperZp.enableOutputs();
-        digitalWrite(this->ledPinZp, HIGH);
-        stepperZp.moveTo(SYRINGE_MIN_POS);
-        while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != SYRINGE_MIN_POS)
+        stepperZp.run();
+    }
+    stepperZp.disableOutputs();
+    digitalWrite(this->ledPinZp, LOW);
+    delay(500);
+
+    #if defined(DISPENSE_TYPE) && DISPENSE_TYPE == 1
+        Serial.println("Vibrate ...");
+        stepperX.setAcceleration(X_MAX_SPEED);
+        stepperX.enableOutputs();
+        digitalWrite(this->ledPinX, HIGH);
+        stepperX.move(-200);
+        while (stepperX.distanceToGo() != 0)
         {
-            stepperZp.run();
+            stepperX.run();
         }
-        stepperZp.disableOutputs();
-        digitalWrite(this->ledPinZp, LOW);
-        return true;
-    }
-    else
-    {
-        Serial.println("Failed to dispense syringe!");
-        return false;
-    }
+        stepperX.move(200);
+        while (stepperX.distanceToGo() != 0)
+        {
+            stepperX.run();
+        }
+        stepperX.disableOutputs();
+        stepperX.setAcceleration(X_ACCELERATION);
+        digitalWrite(this->ledPinX, LOW);
+    #endif
+
+    return true;
 }
 
 bool Dispensing::emptySyringe()
 {
-    if (stepperX.currentPosition() == VIAL_X_POS && stepperZ.currentPosition() == VIAL_Z_POS && stepperZp.currentPosition() == ZP_HOME_POS)
+    if (stepperX.currentPosition() == VIAL_X_POS && stepperZp.currentPosition() == ZP_HOME_POS)
     {
         Serial.println("Emptying syringe ...");
         stepperZp.enableOutputs();
@@ -845,6 +859,11 @@ bool Dispensing::emptySyringe()
         }
         stepperZp.disableOutputs();
         digitalWrite(this->ledPinZp, LOW);
+        return true;
+    }
+    else if (stepperZp.currentPosition() == SYRINGE_MIN_POS)
+    {
+        Serial.println("Already at syringe minimum position!");
         return true;
     }
     else
@@ -867,6 +886,8 @@ bool Dispensing::check(Mqtt &mqtt)
 
             this->volume = volumeMsg.toInt();
             this->capsuleQty = capsuleQtyMsg.toInt();
+            this->syringeMove = map(this->volume, SYRINGE_MIN_VOLUME, SYRINGE_MAX_VOLUME, SYRINGE_MIN_STEPS, SYRINGE_MAX_STEPS + FILLING_OFFSET);
+            
             Serial.println("Volume: " + String(this->volume) + " uL, Capsule Quantity: " + String(this->capsuleQty));
             mqtt.clearSubMessage();
             this->status = false;
@@ -965,7 +986,7 @@ void Dispensing::dispensing()
 {
     Serial.println("Dispensing capsule ...");
     digitalWrite(this->solenoidPin, HIGH);
-    if (this->runToVialX() && this->runToVialZ() && this->emptySyringe())
+    if (this->runToVialX() && this->emptySyringe() && this->runToVialZ())
     {
         for (int i = 0; i < this->capsuleQty; i++)
         {
@@ -980,30 +1001,35 @@ void Dispensing::dispensing()
                     }
                     else
                     {
-                        if (this->runToHomeX())
+                        if (this->runToHomeX() && this->runToHomeZp())
                         {
+                            this->homing();
                             break;
                         }
                         else
                         {
-                            Serial.println("Failed to run to home X!");
+                            Serial.println("Failed to run to home X or Z'!");
+                            this->homing();
                         }
                     }
                 }
                 else
                 {
                     Serial.println("Failed to run to home Z!");
+                    this->homing();
                 }
             }
             else
             {
                 Serial.println("Failed to dispense capsule " + String(i + 1) + "!");
+                this->homing();
             }
         }
     }
     else
     {
         Serial.println("Failed to empty syringe!");
+        this->homing();
     }
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Capsule dispensing completed!");
@@ -1018,6 +1044,7 @@ void Dispensing::dummyDispensing()
         Serial.println("Capsule " + String(i + 1) + " dispensed!");
         delay(1000);
     }
+    this->dummyHoming();
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Dummy dispensing completed!");
 }
@@ -1029,6 +1056,7 @@ void Dispensing::dummyHoming()
     delay(1000);
     digitalWrite(this->solenoidPin, LOW);
     Serial.println("Dummy homing completed!");
+    this->status = true;
 }
 
 Dispensing::~Dispensing() {}

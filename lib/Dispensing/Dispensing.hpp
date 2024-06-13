@@ -8,29 +8,31 @@
 
 #define DRIVER_TYPE 0 // 0 for TMC2208, 1 for DRV8825
 
+#define DISPENSE_TYPE 0 // 0 for Capsule, 1 for Microvial
+
 #define MICROSTEPS 16 // 1/16 microsteps
 
 #define X_OFF_SET 600 // 600 steps
 #define Z_OFF_SET 4000 // 4000 steps
 #define ZP_OFF_SET 4000 // 4000 steps
 
-#define X_HOME_PULL_BACK 3200 // 3200 steps
+#define X_HOME_PULL_BACK 1600 // 1600 steps
 #define Z_HOME_PULL_BACK 6400 // 6400 steps
 #define ZP_HOME_PULL_BACK 6400 // 6400 steps
 
-#define X_ACCELERATION 5000 // 5000 steps/s^2
-#define Z_ACCELERATION 12000 // 8000 steps/s^2
-#define ZP_ACCELERATION 12000 // 8000 steps/s^2
+#define X_ACCELERATION 7000 // 7000 steps/s^2
+#define Z_ACCELERATION 7000 // 7000 steps/s^2
+#define ZP_ACCELERATION 7000 // 7000 steps/s^2
 
-#define X_MAX_SPEED 7000 // 7000 steps/s
-#define X_HOMING_SPEED 2000 // 4000 steps/s
+#define X_MAX_SPEED 10000 // 10000 steps/s
+#define X_HOMING_SPEED 2000 // 2000 steps/s
 #define X_SECOND_HOMING_SPEED 1000 // 1000 steps/s
 
-#define Z_MAX_SPEED 15000 // 7000 steps/s
+#define Z_MAX_SPEED 16000 // 16000 steps/s
 #define Z_HOMING_SPEED 8000 // 8000 steps/s
 #define Z_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
-#define ZP_MAX_SPEED 15000 // 7000 steps/s
+#define ZP_MAX_SPEED 16000 // 16000 steps/s
 #define ZP_HOMING_SPEED 8000 // 8000 steps/s
 #define ZP_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
@@ -42,25 +44,29 @@
 #define Z_STEPS_PER_MM 3200 // 3200 steps/mm
 #define ZP_STEPS_PER_MM 3200 // 3200 steps/mm
 
-#define VIAL_X_POS 1600 // stepper X on vial position
-#define VIAL_Z_POS 230400 // stepper Z on vial position
+#define VIAL_X_POS 1500 // stepper X on vial position
+#define VIAL_Z_POS 172800 // 192000 with chinese syringe, 172800 with hamilton syringe
 
-#define CAPSULE_1_X_POS 4500 // stepper X on capsule 1 position
-#define CAPSULE_2_X_POS 6000 // stepper X on capsule 2 position
-#define CAPSULE_3_X_POS 7500 // stepper X on capsule 3 position
-#define CAPSULE_4_X_POS 9000 // stepper X on capsule 4 position
-#define CAPSULE_5_X_POS 10500 // stepper X on capsule 5 position
+#define CAPSULE_1_X_POS 4600 // stepper X on capsule 1 position
+#define CAPSULE_2_X_POS 6100 // stepper X on capsule 2 position
+#define CAPSULE_3_X_POS 7600 // stepper X on capsule 3 position
+#define CAPSULE_4_X_POS 9100 // stepper X on capsule 4 position
+#define CAPSULE_5_X_POS 10600 // stepper X on capsule 5 position
 
-#define CAPSULE_Z_POS 118400 // stepper Z on capsule position
+#define CAPSULE_Z_POS 54400 // 86400 with chinese syringe, 54400 with hamilton syringe
 
 #define SYRINGE_MIN_POS 211200 // syringe on empty position or 0 uL volume
-#define SYRINGE_MAX_POS 51200 // syringe on full position or 50 uL volume
+
+#define SYRINGE_MIN_STEPS 0
+#define SYRINGE_MAX_STEPS 192000 // 160000 with chinese syringe, 192000 with hamilton syringe
 
 #define SYRINGE_MIN_VOLUME 0 // 0 uL
 #define SYRINGE_MAX_VOLUME 50 // 50 uL
 
 #define CAPSULE_MIN_QTY 0 // 0 capsule
 #define CAPSULE_MAX_QTY 5 // 5 capsules
+
+#define FILLING_OFFSET 3840 // 12000 with chinese syringe, 3840 with hamilton syringe
 
 #define DISPENSING_CHECK_PERIOD 1000 // 1 second
 
@@ -108,9 +114,9 @@ private:
 
     int volume = 0;
     int capsuleQty = 0;
-    bool status = true;
+    bool status = false;
 
-    long sryingeFillingPosition = map(this->volume, SYRINGE_MIN_VOLUME, SYRINGE_MAX_VOLUME, SYRINGE_MIN_POS, SYRINGE_MAX_POS);
+    long syringeMove = 0;
     long capsulePositionX[5] = {CAPSULE_1_X_POS, CAPSULE_2_X_POS, CAPSULE_3_X_POS, CAPSULE_4_X_POS, CAPSULE_5_X_POS}; 
     
     bool fillSyringe();
@@ -132,12 +138,12 @@ private:
     void dispensing();
     void dummyDispensing();
 
-    float acceleration;
-    float maxSpeed;
+    float acceleration = 0;
+    float maxSpeed = 0;
 
-    long pos;
-    long distance;
-    long distanceReverse;
+    long pos = 0;
+    long distance = 0;
+    long distanceReverse = 0;
 
     unsigned long lastCheck = 0;
 

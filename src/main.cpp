@@ -26,6 +26,7 @@ void dispenseStart()
     JsonDocument doc;
     doc["status"] = dispensing.getDispensingStatus();
 
+    first_publish:
     if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
     {
       Serial.println("Published to " + mqtt.getPubTopic() + "!");
@@ -35,6 +36,8 @@ void dispenseStart()
       {
         Serial.println("Dispensing started!");
         doc["status"] = dispensing.getDispensingStatus();
+
+        second_publish:
         if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
         {
           Serial.println("Published to " + mqtt.getPubTopic() + "!");
@@ -43,6 +46,8 @@ void dispenseStart()
         else
         {
           Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+          mqtt.check();
+          goto second_publish;
         }
       }
       else
@@ -53,6 +58,8 @@ void dispenseStart()
     else
     {
       Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+      mqtt.check();
+      goto first_publish;
     }
     checked = false;
   }
@@ -74,6 +81,7 @@ void dispenseStartDummy()
     JsonDocument doc;
     doc["status"] = dispensing.getDispensingStatus();
 
+    first_publish:
     if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
     {
       Serial.println("Published to " + mqtt.getPubTopic() + "!");
@@ -83,6 +91,8 @@ void dispenseStartDummy()
       {
         Serial.println("Dispensing started!");
         doc["status"] = dispensing.getDispensingStatus();
+
+        second_publish:
         if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
         {
           Serial.println("Published to " + mqtt.getPubTopic() + "!");
@@ -91,6 +101,8 @@ void dispenseStartDummy()
         else
         {
           Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+          mqtt.check();
+          goto second_publish;
         }
       }
       else
@@ -101,6 +113,8 @@ void dispenseStartDummy()
     else
     {
       Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+      mqtt.check();
+      goto first_publish;
     }
     checked = false;
   }
@@ -112,6 +126,80 @@ void dispenseStartDummy()
       lastCheck = millis();
     }
     checked = true;
+  }
+}
+
+void dispenseHoming()
+{
+  JsonDocument doc;
+  doc["status"] = dispensing.getDispensingStatus();
+
+  first_publish:
+  if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+  {
+    Serial.println("Published to " + mqtt.getPubTopic() + "!");
+    Serial.println(mqtt.getPubMessage());
+
+    dispensing.homing();
+    
+    Serial.println("Homing started!");
+    doc["status"] = dispensing.getDispensingStatus();
+
+    second_publish:
+    if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+    {
+      Serial.println("Published to " + mqtt.getPubTopic() + "!");
+      Serial.println(mqtt.getPubMessage());
+    }
+    else
+    {
+      Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+      mqtt.check();
+      goto second_publish;
+    }
+  }
+  else
+  {
+    Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+    mqtt.check();
+    goto first_publish;
+  }
+}
+
+void dispenseHomingDummy()
+{
+  JsonDocument doc;
+  doc["status"] = dispensing.getDispensingStatus();
+
+  first_publish:
+  if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+  {
+    Serial.println("Published to " + mqtt.getPubTopic() + "!");
+    Serial.println(mqtt.getPubMessage());
+
+    dispensing.dummyHoming();
+
+    Serial.println("Homing started!");
+    doc["status"] = dispensing.getDispensingStatus();
+
+    second_publish:
+    if (mqtt.publish(DISPENSING_STATUS_TOPIC, doc.as<String>().c_str()))
+    {
+      Serial.println("Published to " + mqtt.getPubTopic() + "!");
+      Serial.println(mqtt.getPubMessage());
+    }
+    else
+    {
+      Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+      mqtt.check();
+      goto second_publish;
+    }
+  }
+  else
+  {
+    Serial.println("Failed to publish to " + mqtt.getPubTopic() + "!");
+    mqtt.check();
+    goto first_publish;
   }
 }
 
@@ -131,9 +219,9 @@ void setup()
   dispensing.init();
 
   #if defined(DISPENSING) && DISPENSING == 0
-    dispensing.dummyHoming();
+    dispenseHomingDummy();
   #elif defined(DISPENSING) && DISPENSING == 1
-    dispensing.homing();
+    dispenseHoming();
   #elif defined(DISPENSING) && DISPENSING == 2
     Serial.println("Serial calibration started!");
   #else
