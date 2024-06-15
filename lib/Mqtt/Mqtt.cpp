@@ -67,6 +67,7 @@ void Mqtt::connect()
             }
             timeNow = millis();
         }
+        delay(10);
     }
 }
 
