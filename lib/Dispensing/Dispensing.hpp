@@ -20,20 +20,20 @@
 #define Z_HOME_PULL_BACK 6400 // 6400 steps
 #define ZP_HOME_PULL_BACK 6400 // 6400 steps
 
-#define X_ACCELERATION 7000 // 7000 steps/s^2
-#define Z_ACCELERATION 7000 // 7000 steps/s^2
-#define ZP_ACCELERATION 7000 // 7000 steps/s^2
+#define X_ACCELERATION 14000
+#define Z_ACCELERATION 10000
+#define ZP_ACCELERATION 10000
 
-#define X_MAX_SPEED 10000 // 10000 steps/s
+#define X_MAX_SPEED 16000
 #define X_HOMING_SPEED 2000 // 2000 steps/s
 #define X_SECOND_HOMING_SPEED 1000 // 1000 steps/s
 
-#define Z_MAX_SPEED 16000 // 16000 steps/s
-#define Z_HOMING_SPEED 8000 // 8000 steps/s
+#define Z_MAX_SPEED 16000
+#define Z_HOMING_SPEED 12000 // 12000 steps/s
 #define Z_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
-#define ZP_MAX_SPEED 16000 // 16000 steps/s
-#define ZP_HOMING_SPEED 8000 // 8000 steps/s
+#define ZP_MAX_SPEED 16000
+#define ZP_HOMING_SPEED 12000 // 12000 steps/s
 #define ZP_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
 #define X_HOME_POS 800 // 800 steps

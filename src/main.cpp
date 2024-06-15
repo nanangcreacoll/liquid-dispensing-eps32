@@ -140,9 +140,8 @@ void dispenseHoming()
     Serial.println("Published to " + mqtt.getPubTopic() + "!");
     Serial.println(mqtt.getPubMessage());
 
-    dispensing.homing();
-    
     Serial.println("Homing started!");
+    dispensing.homing();
     doc["status"] = dispensing.getDispensingStatus();
 
     second_publish:
@@ -177,9 +176,8 @@ void dispenseHomingDummy()
     Serial.println("Published to " + mqtt.getPubTopic() + "!");
     Serial.println(mqtt.getPubMessage());
 
-    dispensing.dummyHoming();
-
     Serial.println("Homing started!");
+    dispensing.dummyHoming();
     doc["status"] = dispensing.getDispensingStatus();
 
     second_publish:

@@ -993,30 +993,50 @@ void Dispensing::dispensing()
             if (this->runToVialX() && this->runToVialZ() && this->fillSyringe() && this->runToHomeZ() && this->runToCapsuleX(i) && this->runToCapsuleZ(i) && this->dispenseSyringe())
             {
                 Serial.println("Capsule " + String(i + 1) + " dispensed!");
-                if (this->runToHomeZ())
+                
+                // if (this->runToHomeZ())
+                // {
+                //     if (this->remainCapsule(i))
+                //     {
+                //         continue;
+                //     }
+                //     else
+                //     {
+                //         if (this->runToHomeX() && this->runToHomeZp())
+                //         {
+                //             this->homing();
+                //             break;
+                //         }
+                //         else
+                //         {
+                //             Serial.println("Failed to run to home X or Z'!");
+                //             this->homing();
+                //         }
+                //     }
+                // }
+                // else
+                // {
+                //     Serial.println("Failed to run to home Z!");
+                //     this->homing();
+                // }
+
+                if (this->remainCapsule(i))
                 {
-                    if (this->remainCapsule(i))
+                    if (this->runToHomeZ())
                     {
                         continue;
                     }
                     else
                     {
-                        if (this->runToHomeX() && this->runToHomeZp())
-                        {
-                            this->homing();
-                            break;
-                        }
-                        else
-                        {
-                            Serial.println("Failed to run to home X or Z'!");
-                            this->homing();
-                        }
+                        Serial.println("Failed to run to home Z!");
+                        this->homing();
+                        break;
                     }
                 }
                 else
                 {
-                    Serial.println("Failed to run to home Z!");
                     this->homing();
+                    break;
                 }
             }
             else

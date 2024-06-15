@@ -19,6 +19,7 @@ void WIFI::init()
             Serial.println("Connecting to WiFi ...");
             timeNow = millis();
         }
+        delay(10);
     }
 
     if (WiFi.status() != WL_CONNECTED)
@@ -46,12 +47,13 @@ void WIFI::check()
                 Serial.println("WiFi not connected!");
                 timeNow = millis();
             }
+            delay(10);
         }
         this->connection = true;
     }
     else if (WiFi.status() == WL_CONNECTED && this->connection)
     {
-        Serial.print("Connected to WiFi IP: ");
+        Serial.print("Reconnected to WiFi, IP: ");
         Serial.println(WiFi.localIP());
         this->connection = false;
     }
