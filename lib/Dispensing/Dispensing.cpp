@@ -52,13 +52,13 @@ void Dispensing::init()
     Serial.println("Using Microsteps: " + String(MICROSTEPS));
 
     stepperX.setEnablePin(this->enablePinX);
-    stepperX.setPinsInverted(DIRECTION_INVERT, false, ENABLE_INVERT);
+    stepperX.setPinsInverted(DIRECTION_INVERT, STEP_INVERT, ENABLE_INVERT);
 
     stepperZ.setEnablePin(this->enablePinZ);
-    stepperZ.setPinsInverted(DIRECTION_INVERT, false, ENABLE_INVERT);
+    stepperZ.setPinsInverted(DIRECTION_INVERT, STEP_INVERT, ENABLE_INVERT);
 
     stepperZp.setEnablePin(this->enablePinZp);
-    stepperZp.setPinsInverted(DIRECTION_INVERT, false, ENABLE_INVERT);
+    stepperZp.setPinsInverted(DIRECTION_INVERT, STEP_INVERT, ENABLE_INVERT);
 
     stepperX.setMaxSpeed(X_MAX_SPEED);
     stepperX.setAcceleration(X_ACCELERATION);
@@ -104,8 +104,8 @@ void Dispensing::homeX()
     stepperX.setCurrentPosition(0);
     delay(1000);
 
-    stepperX.moveTo(X_HOME_PULL_BACK);
-    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_HOME_PULL_BACK)
+    stepperX.moveTo(X_RETRACT);
+    while (stepperX.distanceToGo() != 0 && stepperX.currentPosition() != X_RETRACT)
     {
         stepperX.run();
     }
@@ -152,8 +152,8 @@ void Dispensing::homeZ()
     stepperZ.setCurrentPosition(0);
     delay(1000);
 
-    stepperZ.moveTo(Z_HOME_PULL_BACK);
-    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_HOME_POS)
+    stepperZ.moveTo(Z_RETRACT);
+    while (stepperZ.distanceToGo() != 0 && stepperZ.currentPosition() != Z_RETRACT)
     {
         stepperZ.run();
     }
@@ -200,8 +200,8 @@ void Dispensing::homeZp()
     Serial.println("Stepper Z' on limit switch");
     stepperZp.setCurrentPosition(0);
 
-    stepperZp.moveTo(ZP_HOME_PULL_BACK);
-    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_HOME_PULL_BACK)
+    stepperZp.moveTo(ZP_RETRACT);
+    while (stepperZp.distanceToGo() != 0 && stepperZp.currentPosition() != ZP_RETRACT)
     {
         stepperZp.run();
     }
@@ -473,12 +473,12 @@ void Dispensing::serialCalibrationX()
         while (Serial.available() == 0)
         {
         }
-        this->maxSpeed = Serial.parseFloat();
+        this->maxSpeed = Serial.readStringUntil('\r\n').toFloat();
         Serial.println("Enter acceleration: ");
         while (Serial.available() == 0)
         {
         }
-        this->acceleration = Serial.parseFloat();
+        this->acceleration = Serial.readStringUntil('\r\n').toFloat();
         this->setMaxSpeedAndAccelerationX(maxSpeed, acceleration);
         Serial.println("Stepper X max speed: " + String(stepperX.maxSpeed()) + " steps/s, acceleration: " + String(stepperX.acceleration()) + " steps/s^2");
         break;
@@ -490,7 +490,7 @@ void Dispensing::serialCalibrationX()
         while (Serial.available() == 0)
         {
         }
-        this->pos = Serial.parseInt();
+        this->pos = Serial.readStringUntil('\r\n').toInt();
         this->runAndMoveToPosX(pos);
         break;
     case 4:
@@ -498,7 +498,7 @@ void Dispensing::serialCalibrationX()
         while (Serial.available() == 0)
         {
         }
-        this->distance = Serial.parseInt();
+        this->distance = Serial.readStringUntil('\r\n').toInt();
         this->runAndMovePosX(distance);
         break;
     case 5:
@@ -506,7 +506,7 @@ void Dispensing::serialCalibrationX()
         while (Serial.available() == 0)
         {
         }
-        this->distanceReverse = -1 * Serial.parseInt();
+        this->distanceReverse = -1 * Serial.readStringUntil('\r\n').toInt();
         this->runAndMovePosX(distanceReverse);
         break;
     default:
@@ -535,12 +535,12 @@ void Dispensing::serialCalibrationZ()
         while (Serial.available() == 0)
         {
         }
-        this->maxSpeed = Serial.parseFloat();
+        this->maxSpeed = Serial.readStringUntil('\r\n').toFloat();
         Serial.println("Enter acceleration: ");
         while (Serial.available() == 0)
         {
         }
-        this->acceleration = Serial.parseFloat();
+        this->acceleration = Serial.readStringUntil('\r\n').toFloat();
         this->setMaxSpeedAndAccelerationZ(maxSpeed, acceleration);
         Serial.println("Stepper Z max speed: " + String(stepperZ.maxSpeed()) + " steps/s, acceleration: " + String(stepperZ.acceleration()) + " steps/s^2");
         break;
@@ -552,7 +552,7 @@ void Dispensing::serialCalibrationZ()
         while (Serial.available() == 0)
         {
         }
-        this->pos = Serial.parseInt();
+        this->pos = Serial.readStringUntil('\r\n').toInt();
         this->runAndMoveToPosZ(pos);
         break;
     case 4:
@@ -560,7 +560,7 @@ void Dispensing::serialCalibrationZ()
         while (Serial.available() == 0)
         {
         }
-        this->distance = Serial.parseInt();
+        this->distance = Serial.readStringUntil('\r\n').toInt();
         this->runAndMovePosZ(distance);
         break;
     case 5:
@@ -568,7 +568,7 @@ void Dispensing::serialCalibrationZ()
         while (Serial.available() == 0)
         {
         }
-        this->distanceReverse = -1 * Serial.parseInt();
+        this->distanceReverse = -1 * Serial.readStringUntil('\r\n').toInt();
         this->runAndMovePosZ(distanceReverse);
         break;
     default:
@@ -597,12 +597,12 @@ void Dispensing::serialCalibrationZp()
         while (Serial.available() == 0)
         {
         }
-        this->maxSpeed = Serial.parseFloat();
+        this->maxSpeed = Serial.readStringUntil('\r\n').toFloat();
         Serial.println("Enter acceleration: ");
         while (Serial.available() == 0)
         {
         }
-        this->acceleration = Serial.parseFloat();
+        this->acceleration = Serial.readStringUntil('\r\n').toFloat();
         this->setMaxSpeedAndAccelerationZp(maxSpeed, acceleration);
         Serial.println("Stepper Z' max speed: " + String(stepperZp.maxSpeed()) + " steps/s, acceleration: " + String(stepperZp.acceleration()) + " steps/s^2");
         break;
@@ -614,7 +614,7 @@ void Dispensing::serialCalibrationZp()
         while (Serial.available() == 0)
         {
         }
-        this->pos = Serial.parseInt();
+        this->pos = Serial.readStringUntil('\r\n').toInt();
         this->runAndMoveToPosZp(pos);
         break;
     case 4:
@@ -622,7 +622,7 @@ void Dispensing::serialCalibrationZp()
         while (Serial.available() == 0)
         {
         }
-        this->distance = Serial.parseInt();
+        this->distance = Serial.readStringUntil('\r\n').toInt();
         this->runAndMovePosZp(distance);
         break;
     case 5:
@@ -630,7 +630,7 @@ void Dispensing::serialCalibrationZp()
         while (Serial.available() == 0)
         {
         }
-        this->distanceReverse = -1 * Serial.parseInt();
+        this->distanceReverse = -1 * Serial.readStringUntil('\r\n').toInt();
         this->runAndMovePosZp(distanceReverse);
         break;
     default:
@@ -994,32 +994,6 @@ void Dispensing::dispensing()
             {
                 Serial.println("Capsule " + String(i + 1) + " dispensed!");
                 
-                // if (this->runToHomeZ())
-                // {
-                //     if (this->remainCapsule(i))
-                //     {
-                //         continue;
-                //     }
-                //     else
-                //     {
-                //         if (this->runToHomeX() && this->runToHomeZp())
-                //         {
-                //             this->homing();
-                //             break;
-                //         }
-                //         else
-                //         {
-                //             Serial.println("Failed to run to home X or Z'!");
-                //             this->homing();
-                //         }
-                //     }
-                // }
-                // else
-                // {
-                //     Serial.println("Failed to run to home Z!");
-                //     this->homing();
-                // }
-
                 if (this->remainCapsule(i))
                 {
                     if (this->runToHomeZ())

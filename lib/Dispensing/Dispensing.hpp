@@ -16,23 +16,23 @@
 #define Z_OFF_SET 4000 // 4000 steps
 #define ZP_OFF_SET 4000 // 4000 steps
 
-#define X_HOME_PULL_BACK 1600 // 1600 steps
-#define Z_HOME_PULL_BACK 6400 // 6400 steps
-#define ZP_HOME_PULL_BACK 6400 // 6400 steps
+#define X_RETRACT 500 // 500 steps
+#define Z_RETRACT 6400 // 6400 steps
+#define ZP_RETRACT 6400 // 6400 steps
 
-#define X_ACCELERATION 14000
-#define Z_ACCELERATION 10000
-#define ZP_ACCELERATION 10000
+#define X_ACCELERATION 12000 // 12000 steps/s^2
+#define Z_ACCELERATION 14000 // 14000 steps/s^2
+#define ZP_ACCELERATION 14000 // 14000 steps/s^2
 
-#define X_MAX_SPEED 16000
-#define X_HOMING_SPEED 2000 // 2000 steps/s
-#define X_SECOND_HOMING_SPEED 1000 // 1000 steps/s
+#define X_MAX_SPEED 16000 // 16000 steps/s
+#define X_HOMING_SPEED 2500 // 2500 steps/s
+#define X_SECOND_HOMING_SPEED 500 // 500 steps/s
 
 #define Z_MAX_SPEED 16000
 #define Z_HOMING_SPEED 12000 // 12000 steps/s
 #define Z_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
-#define ZP_MAX_SPEED 16000
+#define ZP_MAX_SPEED 16000 // 16000 steps/s
 #define ZP_HOMING_SPEED 12000 // 12000 steps/s
 #define ZP_SECOND_HOMING_SPEED 4000 // 4000 steps/s
 
@@ -57,7 +57,7 @@
 
 #define SYRINGE_MIN_POS 211200 // syringe on empty position or 0 uL volume
 
-#define SYRINGE_MIN_STEPS 0
+#define SYRINGE_MIN_STEPS 0 // 0 steps
 #define SYRINGE_MAX_STEPS 192000 // 160000 with chinese syringe, 192000 with hamilton syringe
 
 #define SYRINGE_MIN_VOLUME 0 // 0 uL
@@ -74,11 +74,13 @@
     #define MS1_STATE HIGH // MS1 pin state
     #define MS2_STATE HIGH // MS2 pin state
     #define DIRECTION_INVERT false // invert direction
+    #define STEP_INVERT false // invert step
     #define ENABLE_INVERT true // invert enable
 #elif defined(DRIVER_TYPE) && DRIVER_TYPE == 1
     #define MS1_STATE LOW // MS1 pin state
     #define MS2_STATE LOW // MS2 pin state
     #define DIRECTION_INVERT false // invert direction
+    #define STEP_INVERT false // invert step
     #define ENABLE_INVERT true // invert enable
 #endif
 
